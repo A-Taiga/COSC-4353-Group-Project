@@ -4,7 +4,7 @@ import "./FormComponent.css";
 
 export interface IInput extends InputHTMLAttributes<HTMLInputElement>
 {
-	label: string
+	label?: string
 	refer?: any,
 	error?: string,
 	focused?: string,
