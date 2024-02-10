@@ -2,16 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
-import Registration from './Registration';
-import Login from './Login';
+import StartPage from './StartPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    {/* <Registration/> */}
-    <Login/>
+    <StartPage/>
   </React.StrictMode>
 );
 

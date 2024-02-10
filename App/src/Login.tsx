@@ -3,11 +3,8 @@ import React from 'react';
 import FormTextInput, { IInput} from "./Components/FormComponent";
 import "./Login.css";
 
-export default function Login() {
+export default function Login(props: any) {
 
-
-	let username = "";
-	let passowrd = "";
 
 	const forms: IInput[] =
 	[
@@ -16,39 +13,36 @@ export default function Login() {
 			name: "username",
 			type: "text",
 			label: "Username",
+			required: true,
 		},
 		{
 			id: "password",
 			name: "passowrd",
 			type: "password",
 			label: "Password",
+			required: true,
 		}
 	]
 
-	const handleSubmit = (e: React.FormEvent<HTMLButtonElement>) =>
-	{
-		const target = e.target as HTMLButtonElement;
-	}
-
-	const getValues = (e: React.FormEvent<HTMLInputElement>) =>
-	{
-		const target = e.target as HTMLInputElement;
-		if(target.id === "username")
-			username = target.value;
-		else if(target.id == "password")
-			passowrd = target.value;
-	}
-
 	return(
-		<div id = "container">
+		<div id = "loginContainer">
 			<h1>Login</h1>
-			<form onSubmit={e => e.preventDefault()}>
-			{forms.map((forms) => <FormTextInput key = {forms.id} {...forms} onChange={getValues}/>)}
-			<div id = "buttons">
-				<button id = "login" onClick={handleSubmit}>Login</button>
-				<button id = "register" onClick={handleSubmit}>Register</button>
-			</div>
+			<form onSubmit={submition_handler}>
+				{forms.map((forms) => <FormTextInput key = {forms.id} {...forms} />)}
+				<div id = "buttons">
+					<button id = "login">Login</button>
+				</div>
 			</form>
+			<div id = "divider"></div>
+			<button id = "register" onClick={e => props.set("register")}>Register</button>
 		</div>
 	)
+}
+
+function submition_handler (e: React.FormEvent<HTMLFormElement>)
+{
+	const target = e.target as HTMLFormElement;
+	e.preventDefault();
+	const data = new FormData(target);
+	console.log(data);
 }
