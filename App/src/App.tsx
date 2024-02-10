@@ -1,10 +1,11 @@
 import './App.css'
+import StartPage from './StartPage/StartPage'
 
 function App() {
 
   return (
     <>
-    <div>hello world!</div>
+    <StartPage/>
     </>
   )
 }
