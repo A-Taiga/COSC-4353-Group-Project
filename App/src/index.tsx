@@ -10,8 +10,8 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <Registration/>
-    {/* <Login/> */}
+    {/* <Registration/> */}
+    <Login/>
   </React.StrictMode>
 );
 

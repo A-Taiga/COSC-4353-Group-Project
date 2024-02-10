@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import FormTextInput, { IInput} from "./Components/FormComponent";
-import "./Registration.css";
+
 export default function Registration()
 {
 let passwordExpression = "^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$";
