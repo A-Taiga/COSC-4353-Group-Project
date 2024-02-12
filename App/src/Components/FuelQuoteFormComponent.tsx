@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import FormTextInput, { IInput} from "./FormComponent";
 import "./FuelQuoteFormComponent.css"
 
 // Replace with fetched CLient Address Here (Server Side stuff)
 const delivAddress = "123 Nunya ln";
 // Replace with pricing module calculations
-const suggestedPrice = "$200,000,000"
+const suggestedPrice = 2.50;
 
 
 export default function FuelQuoteForm(props: any) {
-
+	
+	const [gallonsRequested, setGallonsRequested] = useState('');
+	const [totalAmountDue, setTotalAmountDue] = useState('');
 
 	const forms: IInput[] =
 	[
@@ -19,6 +21,13 @@ export default function FuelQuoteForm(props: any) {
 			type: "text",
 			label: "Gallons Requested",
 			required: true,
+			// Calculates in real time as user inputs gallons requested
+			onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+        const gallons = e.target.value;
+        setGallonsRequested(gallons);
+        const total = gallons ? parseFloat(gallons) * suggestedPrice : 0;
+        setTotalAmountDue(total.toFixed(2));
+      }
 		},
 		{
 			id: "delivDate",
@@ -42,7 +51,15 @@ export default function FuelQuoteForm(props: any) {
 			label: "Suggested Price",
 			value: suggestedPrice,
 			disabled: true,
-		}
+		},
+		{
+      id: "totalAmount",
+      name: "totalAmount",
+      type: "text",
+      label: "Total Amount Due",
+      value: totalAmountDue ? `$${totalAmountDue}` : '',
+      disabled: true,
+    }
 	];
 
 	return(
@@ -63,7 +80,10 @@ const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 	e.preventDefault();
 	const target = e.target as HTMLFormElement
 	const data = new FormData(target);
-  // Console log is for testing only (should not be returned in final pub)
+	// Added because "disabled" didnt pass these values through to console.log
+	data.append('delivAddress', delivAddress);
+	data.append('suggestedPrice', suggestedPrice.toFixed(2));
+  // REMOVE BEFORE FINAL
 	console.log(Object.fromEntries(data.entries()));
   // Implemenent saving to database for fuel quote history 
 };
