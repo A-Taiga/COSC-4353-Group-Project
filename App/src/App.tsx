@@ -8,6 +8,7 @@ function App() {
 
   return (
     // Router allows for client-side routing
+    // Add your pages here and their routes
     <Router>
       <div className='App'>
         <Routes>
