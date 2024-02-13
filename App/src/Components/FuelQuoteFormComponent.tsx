@@ -13,21 +13,25 @@ export default function FuelQuoteForm(props: any) {
 	const [gallonsRequested, setGallonsRequested] = useState('');
 	const [totalAmountDue, setTotalAmountDue] = useState('');
 
+	// Calculates in real time as user inputs gallons requested
+	const handleGallonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const gallons = e.target.value;
+		setGallonsRequested(gallons);
+		const total = gallons ? parseFloat(gallons) * suggestedPrice : 0;
+		setTotalAmountDue(total.toFixed(2));
+	}
+	
 	const forms: IInput[] =
 	[
 		{
 			id: "gallonsRequested",
 			name: "gallonsRequested",
-			type: "text",
+			type: "number",
 			label: "Gallons Requested",
 			required: true,
-			// Calculates in real time as user inputs gallons requested
-			onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
-        const gallons = e.target.value;
-        setGallonsRequested(gallons);
-        const total = gallons ? parseFloat(gallons) * suggestedPrice : 0;
-        setTotalAmountDue(total.toFixed(2));
-      }
+			min: 1,
+			max: 10000,
+			onChange: handleGallonChange
 		},
 		{
 			id: "delivDate",
@@ -35,6 +39,8 @@ export default function FuelQuoteForm(props: any) {
 			type: "date",
 			label: "Delivery Date",
 			required: true,
+			// Prevents user from picking past and present dates
+			min: new Date().toISOString().split('T')[0],
 		},
 		{
 			id: "delivAddress",

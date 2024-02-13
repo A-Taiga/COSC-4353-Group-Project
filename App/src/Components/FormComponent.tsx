@@ -1,32 +1,30 @@
-
-import {useState, InputHTMLAttributes} from "react";
+import { useState, InputHTMLAttributes } from "react";
 import "./FormComponent.css";
 
-export interface IInput extends InputHTMLAttributes<HTMLInputElement>
-{
-	label?: string
-	refer?: any,
-	error?: string,
-	focused?: string,
+export interface IInput extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
 }
 
-export default function FormTextInput(prop: IInput)
-{
-	let [focused, setFocused] = useState(false);
-	const handleOnFocus = (e: any) => {setFocused(false);}
-	const handleBlur = (e: any) => {setFocused(true);}
-	return (
-		
-		<div id = "formTextContainer">
-			<label htmlFor = {prop.id}>{prop.label}</label>
-			<input 
-			focused = {focused.toString()}
-			{...prop}
-			onBlur={handleBlur}
-			onFocus={handleOnFocus}
-			>
-			</input>
-			<span>{prop.error}</span>
-		</div>
-	)
+export default function FormTextInput(props: IInput) {
+  const [isFocused, setIsFocused] = useState(false);
+  const handleFocus = () => setIsFocused(true);
+  const handleBlur = (e: any) => {
+    setIsFocused(false);
+    // If your input has an onBlur prop passed to it, call it
+    if (props.onBlur) props.onBlur(e);
+  };
+
+  return (
+    <div id="formTextContainer" className={isFocused ? 'focused' : ''}>
+      <label htmlFor={props.id}>{props.label}</label>
+      <input 
+        {...props} // Spread the props first to correctly apply the onFocus, onBlur from props if provided
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        // Remove the focused attribute since it's not valid for <input>
+      />
+      {props.error && <div style={{ color: 'red', marginTop: '5px' }}>{props.error}</div>}
+    </div>
+  );
 }
