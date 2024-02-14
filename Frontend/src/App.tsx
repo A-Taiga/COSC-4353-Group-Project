@@ -1,23 +1,35 @@
-import React from 'react'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import './App.css'
-import StartPage from './StartPage/StartPage';
-import FuelQuoteForm from './Components/FuelQuoteFormComponent';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import "./App.css"
+// import StartPage from "./StartPage/StartPage"
+import Login from "./pages/Login.tsx"
+import Register from "./pages/Registration.tsx"
+// import FuelQuoteForm from "./Components/FuelQuoteFormComponent"
 
-function App() {
-
+export default function App() {
   return (
     // Router allows for client-side routing
     // Add your pages here and their routes
-    <Router>
-      <div className='App'>
-        <Routes>
-          <Route path="/"  element={<StartPage />} />
-          <Route path="/fuel-quote" element={<FuelQuoteForm />} />
-        </Routes>
-      </div>
-    </Router>
-  );
-}
+    <BrowserRouter>
+      {/* Ensure BrowserRouter is used */}
+      <Routes>
+        <Route path="/">
+          {/* public routes */}
+          <Route index element={<Login />} />
+          <Route path="login" element={<Navigate replace to="/" />} />
+          <Route path="register" element={<Register />} />
 
-export default App;
+          {/* protected routes */}
+          {/* <Route element={<RequireAuth />}>
+            <Route path="/fuel-quote" element={<FuelQuoteForm />} />
+          </Route> */}
+
+          {/* unavailable page in case of error */}
+          {/* <Route path="unavailable" element={<Unavailable />} /> */}
+
+          {/* catch all */}
+          {/* <Route path="*" element={<Missing />} /> */}
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  )
+}
