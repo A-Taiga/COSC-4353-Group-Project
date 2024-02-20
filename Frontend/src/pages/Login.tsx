@@ -1,6 +1,6 @@
 import React from "react"
 import FormTextInput, { IInput } from "../components/FormComponent"
-import { NavLink } from "react-router-dom"
+import NavButton from "../components/NavButton"
 import "./Login.css"
 
 export default function Login() {
@@ -20,7 +20,6 @@ export default function Login() {
       required: true,
     },
   ]
-
   return (
     <div id="loginContainer">
       <h1>Login</h1>
@@ -33,7 +32,7 @@ export default function Login() {
         </div>
       </form>
       <div id="divider"></div>
-      <NavLink to="/register">Register Here</NavLink>
+      <NavButton id = "register" to = "/register">Register</NavButton>
     </div>
   )
 }
