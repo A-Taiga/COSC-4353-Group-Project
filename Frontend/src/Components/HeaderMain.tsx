@@ -26,23 +26,28 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ")
 }
 
-// interface NavbarProps {
-//   selected: string
-// }
+// Define a type for the path to title mapping
+interface PathToTitleMap {
+  [key: string]: string
+}
 
 export default function HeaderMain() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  const handleLinkClick = (e, href) => {
-    if (location.pathname == href) {
+  // Type the event parameter and href parameter in the handleLinkClick function
+  const handleLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    href: string
+  ) => {
+    if (location.pathname === href) {
       e.preventDefault() // Prevent the link from navigating
       e.stopPropagation() // Stop the event from propagating further
     }
   }
 
-  // Mapping of paths to their respective header titles
-  const pathToTitle = {
+  // Mapping of paths to their respective header titles with typed object
+  const pathToTitle: PathToTitleMap = {
     "/fuelform": "Dashboard",
     "/history": "History",
     "/profile": "Profile",
@@ -52,7 +57,6 @@ export default function HeaderMain() {
   // Determine the header title based on the current path
   // Default to "Dashboard" if the current path isn't found in the mapping
   const headerTitle = pathToTitle[location.pathname] || "Dashboard"
-
   return (
     <>
       <div className="min-h-full">
