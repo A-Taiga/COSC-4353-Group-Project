@@ -1,7 +1,7 @@
 import React from "react"
 import FormTextInput, { IInput } from "../components/FormComponent"
 import { NavLink } from "react-router-dom"
-import "./Registration.css"
+import "../styles//Registration.css"
 
 export default function Register() {
   const passwordExpression =

@@ -1,7 +1,7 @@
 import React from "react"
 import FormTextInput, { IInput } from "../components/FormComponent"
 import { NavLink } from "react-router-dom"
-import "./Login.css"
+import "../styles/Login.css"
 
 export default function Login() {
   const forms: IInput[] = [
