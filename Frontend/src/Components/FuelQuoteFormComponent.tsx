@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import FormTextInput, { IInput} from "./FormComponent";
+import FormTextInput, {IInput} from "./FormComponent.tsx";
 import "./FuelQuoteFormComponent.css"
 
 // Replace with fetched CLient Address Here (Server Side stuff)
