@@ -3,7 +3,11 @@ import "./App.css"
 // import StartPage from "./StartPage/StartPage"
 import Login from "./pages/Login.tsx"
 import Register from "./pages/Registration.tsx"
-// import FuelQuoteForm from "./Components/FuelQuoteFormComponent"
+import RequireAuth from "./components/RequireAuth.tsx"
+import Layout from "./components/Layout.tsx"
+import FuelQuote from "./pages/FuelQuote.tsx"
+import History from "./pages/History.tsx"
+import Profile from "./pages/Profile.tsx"
 
 export default function App() {
   return (
@@ -19,9 +23,14 @@ export default function App() {
           <Route path="register" element={<Register />} />
 
           {/* protected routes */}
-          {/* <Route element={<RequireAuth />}>
-            <Route path="/fuel-quote" element={<FuelQuoteForm />} />
-          </Route> */}
+          {/* <Route element={<RequireAuth />}> */}
+          <Route path="/" element={<Layout />}>
+            <Route path="fuel-quote" element={<FuelQuote />} />
+            <Route index element={<Navigate to="fuel-quote" replace />} />
+            <Route path="history" element={<History />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
+          {/* </Route> */}
 
           {/* unavailable page in case of error */}
           {/* <Route path="unavailable" element={<Unavailable />} /> */}

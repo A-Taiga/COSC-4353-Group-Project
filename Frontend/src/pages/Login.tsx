@@ -1,7 +1,7 @@
 import React from "react"
 import FormTextInput, { IInput } from "../components/FormComponent"
-import NavButton from "../components/NavButton"
-import "./Login.css"
+import { NavLink } from "react-router-dom"
+import "../styles/Login.css"
 
 export default function Login() {
   const forms: IInput[] = [
@@ -20,6 +20,7 @@ export default function Login() {
       required: true,
     },
   ]
+
   return (
     <div id="loginContainer">
       <h1>Login</h1>
@@ -32,7 +33,7 @@ export default function Login() {
         </div>
       </form>
       <div id="divider"></div>
-      <NavButton id = "register" to = "/register">Register</NavButton>
+      <NavLink to="/register">Register Here</NavLink>
     </div>
   )
 }

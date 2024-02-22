@@ -1,7 +1,7 @@
 import React from "react"
 import FormTextInput, { IInput } from "../components/FormComponent"
 import NavButton from "../components/NavButton"
-import "./Registration.css"
+import "../styles//Registration.css"
 
 export default function Register() {
   const passwordExpression =
@@ -56,7 +56,7 @@ export default function Register() {
       <div id="header">
         <h1>Register</h1>
       </div>
-      <NavButton id = "login" to = "/login">
+      <NavButton id="login" to="/login">
         X
       </NavButton>
 

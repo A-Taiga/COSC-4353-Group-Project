@@ -9,7 +9,7 @@
   width: fit-content;
   height: fit-content;
   margin: auto;
-  position: absolute; 
+  position: flex; 
   top: 0;
   bottom: 0;
   left: 0;
