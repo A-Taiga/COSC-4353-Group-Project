@@ -1,6 +1,6 @@
 import React from "react"
 import FormTextInput, { IInput } from "../components/FormComponent"
-import { NavLink } from "react-router-dom"
+import NavButton from "../components/NavButton"
 import "../styles//Registration.css"
 
 export default function Register() {
@@ -56,9 +56,10 @@ export default function Register() {
       <div id="header">
         <h1>Register</h1>
       </div>
-      <NavLink id="login" to="/login">
+      <NavButton id="login" to="/login">
         X
-      </NavLink>
+      </NavButton>
+
       <form onSubmit={submition_handler}>
         {forms.map((forms) => (
           <FormTextInput key={forms.id} {...forms} onChange={getValues} />
