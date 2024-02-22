@@ -9,7 +9,11 @@ export default function Layout() {
     <>
       <div className="w-screen">
         <HeaderMain />
-        <Outlet context={[selected, setSelected]} />
+        <main>
+          <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+            <Outlet context={[selected, setSelected]} />
+          </div>
+        </main>
       </div>
     </>
   )
