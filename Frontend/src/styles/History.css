@@ -1,0 +1,46 @@
+/* History.css */
+#fuelQuoteContainer {
+    box-shadow: 1px 1px 5px 1px black;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    margin: auto;
+    position: flex; 
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0; 
+  }
+  
+  #tableTitle {
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  #quoteHistoryTableContainer {
+    overflow-x: auto;
+    width: 100%;
+    max-width: 900px;
+  }
+  
+  #quoteHistoryTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+
+  
+  #quoteHistoryTable th, #quoteHistoryTable td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  #quoteHistoryTable th {
+    background-color: rgb(0, 255, 170);
+  }
