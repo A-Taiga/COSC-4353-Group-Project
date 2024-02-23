@@ -80,6 +80,7 @@ export default function FuelQuoteForm(props: any) {
   )
 }
 
+// Send data to database, or for now logs
 const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault()
   const target = e.target as HTMLFormElement
