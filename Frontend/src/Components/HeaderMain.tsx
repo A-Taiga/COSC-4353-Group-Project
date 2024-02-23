@@ -134,16 +134,16 @@ export default function HeaderMain() {
                           <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                             {userNavigation.map((item) => (
                               <Menu.Item key={item.name}>
-                                {({ active }) => (
-                                  <a
-                                    href={item.href}
-                                    className={classNames(
-                                      active ? "bg-gray-100" : "",
-                                      "block px-4 py-2 text-sm text-gray-700"
-                                    )}
+                                {() => (
+                                  <Link
+                                    to={item.href}
+                                    onClick={(e) =>
+                                      handleLinkClick(e, item.href)
+                                    }
+                                    className="block px-4 py-2 text-sm text-gray-700"
                                   >
                                     {item.name}
-                                  </a>
+                                  </Link>
                                 )}
                               </Menu.Item>
                             ))}
@@ -246,11 +246,6 @@ export default function HeaderMain() {
             </h1>
           </div>
         </header>
-        <main>
-          <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
-            {/* Your content */}
-          </div>
-        </main>
       </div>
     </>
   )
