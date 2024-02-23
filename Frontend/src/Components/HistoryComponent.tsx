@@ -1,93 +1,91 @@
-import React, { useState } from "react"
-import FormTextInput, { IInput } from "./FormComponent"
-import "../styles/FuelQuoteFormComponent.css"
+import React, { useState } from 'react';
+import '../styles/History.css';
 
-// Replace with fetched CLient Address Here (Server Side stuff)
-const delivAddress = "123 Nunya ln"
-// Replace with pricing module calculations
-const suggestedPrice = 2.5
+interface Quote {
+    transactionId: number;
+    gallonsRequested: number;
+    delivDate: string;
+    delivAddress: string;
+    suggestedPrice: number;
+    totalAmountDue: number;
+}
 
-export default function DisplayHistory(props: any) {
-  const [gallonsRequested, setGallonsRequested] = useState("")
-  const [totalAmountDue, setTotalAmountDue] = useState("")
-
-  // Calculates in real time as user inputs gallons requested
-  const handleGallonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const gallons = e.target.value
-    setGallonsRequested(gallons)
-    const total = gallons ? parseFloat(gallons) * suggestedPrice : 0
-    setTotalAmountDue(total.toFixed(2))
-  }
-
-  const forms: IInput[] = [
+const DisplayHistory = () => {
+  // Dummy quotes data for display, to be replaced with database fetching
+  const [quotes] = useState<Quote[]>([
     {
-      id: "gallonsRequested",
-      name: "gallonsRequested",
-      type: "number",
-      label: "Gallons Requested",
-      required: true,
-      min: 1,
-      max: 10000,
-      onChange: handleGallonChange,
+        transactionId: 16782,
+        gallonsRequested: 100,
+        delivDate: "08-04-1980",
+        delivAddress: "123 Nunya Ln. University, Texas 77000",
+        suggestedPrice: 2.5,
+        totalAmountDue: 250,
     },
     {
-      id: "delivDate",
-      name: "delivDate",
-      type: "date",
-      label: "Delivery Date",
-      required: true,
-      // Prevents user from picking past and present dates
-      min: new Date().toISOString().split("T")[0],
-    },
-    {
-      id: "delivAddress",
-      name: "delivAddress",
-      type: "text",
-      label: "Delivery Address",
-      value: delivAddress,
-      disabled: true,
-    },
-    {
-      id: "suggestedPrice",
-      name: "suggestedPrice",
-      type: "text",
-      label: "Suggested Price",
-      value: suggestedPrice,
-      disabled: true,
-    },
-    {
-      id: "totalAmount",
-      name: "totalAmount",
-      type: "text",
-      label: "Total Amount Due",
-      value: totalAmountDue ? `$${totalAmountDue}` : "",
-      disabled: true,
-    },
-  ]
+        transactionId: 23769,
+        gallonsRequested: 20,
+        delivDate: "02-13-1987",
+        delivAddress: "123 Nunya Ln. University, Texas 77000",
+        suggestedPrice: 2.5,
+        totalAmountDue: 50,
+      },
+      {
+        transactionId: 36540,
+        gallonsRequested: 35,
+        delivDate: "04-20-1991",
+        delivAddress: "123 Nunya Ln. University, Texas 77000",
+        suggestedPrice: 2.5,
+        totalAmountDue: 87.5,
+      },
+      {
+        transactionId: 41867,
+        gallonsRequested: 180,
+        delivDate: "01-02-1995",
+        delivAddress: "123 Nunya Ln. University, Texas 77000",
+        suggestedPrice: 2.5,
+        totalAmountDue: 450,
+      },
+      {
+        transactionId: 52008,
+        gallonsRequested: 79,
+        delivDate: "09-23-2007",
+        delivAddress: "123 Nunya Ln. University, Texas 77000",
+        suggestedPrice: 2.5,
+        totalAmountDue: 197.5,
+      },
+  ]);
 
   return (
     <div id="fuelQuoteContainer">
-      <h1>Fuel Quote Form</h1>
-      <form id="fuelQuoteForm" onSubmit={handleSubmit}>
-        {forms.map((field) => (
-          <FormTextInput key={field.id} {...field} />
-        ))}
-        <button id="submitQuote" type="submit">
-          Submit Quote
-        </button>
-      </form>
+      <h1 id = "tableTitle"> All Quotes</h1>
+      <div id="quoteHistoryTableContainer">
+        <table id="quoteHistoryTable">
+          <thead>
+            <tr>
+              <th>Transaction Id</th>
+              <th>Gallons Requested</th>
+              <th>Delivery Date</th>
+              <th>Delivery Address</th>
+              <th>Suggested Price</th>
+              <th>Total Amount Due</th>
+            </tr>
+          </thead>
+          <tbody>
+            {quotes.map((quote, index) => (
+              <tr key={index}>
+                <td>{quote.transactionId}</td>
+                <td>{quote.gallonsRequested}</td>
+                <td>{quote.delivDate}</td>
+                <td>{quote.delivAddress}</td>
+                <td>${quote.suggestedPrice.toFixed(2)}</td>
+                <td>${quote.totalAmountDue.toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
-  )
-}
+  );
+};
 
-const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault()
-  const target = e.target as HTMLFormElement
-  const data = new FormData(target)
-  // Added because "disabled" didnt pass these values through to console.log
-  data.append("delivAddress", delivAddress)
-  data.append("suggestedPrice", suggestedPrice.toFixed(2))
-  // REMOVE BEFORE FINAL
-  console.log(Object.fromEntries(data.entries()))
-  // Implemenent saving to database for fuel quote history
-}
+export default DisplayHistory;
