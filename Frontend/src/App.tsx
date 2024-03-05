@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import "./App.css"
-// import StartPage from "./StartPage/StartPage"
+import StartPage from "./pages/StartPage.tsx"
 import Login from "./pages/Login.tsx"
 import Register from "./pages/Registration.tsx"
 import RequireAuth from "./components/RequireAuth.tsx"
@@ -16,10 +16,10 @@ export default function App() {
     <BrowserRouter>
       {/* Ensure BrowserRouter is used */}
       <Routes>
-        <Route path="/">
+        <Route path="/" >
           {/* public routes */}
-          <Route index element={<Login />} />
-          <Route path="login" element={<Navigate replace to="/" />} />
+          <Route index element={<StartPage />} />
+          <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
 
           {/* protected routes */}
