@@ -1,12 +1,8 @@
 {
   "ignorePatterns": ["**/*.js"],
   "root": true,
-  "extends": [
-    "airbnb-base",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended",
-  ],
-  "plugins": ["prettier", "import", "@typescript-eslint"],
+  "extends": ["airbnb", "plugin:prettier/recommended"],
+  "plugins": ["prettier", "import"],
   "rules": {
     "prettier/prettier": [
       "error",
@@ -20,11 +16,10 @@
     "import/extensions": [
       "error",
       {
-        "js": "always",
+        "js": "never",
       },
     ],
     "import/no-unresolved": ["off"],
-    "@typescript-eslint/no-explicit-any": "off",
     "no-restricted-syntax": "off",
     "no-continue": "off",
     "no-console": "off",
@@ -32,11 +27,8 @@
     "consistent-return": "off",
     "eqeqeq": "off",
     "func-names": "off",
-    "no-else-return": "off",
-    "no-unsafe-optional-chaining": "off",
-    "no-await-in-loop": "off",
   },
-  "parser": "@typescript-eslint/parser",
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
@@ -49,3 +41,4 @@
     },
   },
 }
+ 
