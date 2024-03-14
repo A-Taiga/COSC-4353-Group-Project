@@ -1,11 +1,17 @@
-import { pgTable, uuid, varchar, timestamp } from 'drizzle-orm/pg-core'
-import { relations, sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm'
+import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
 // Define users tables
 export const users = pgTable('users', {
   id: uuid('id').primaryKey(),
-  username: varchar('username', { length: 256 }).notNull().unique(),
-  password: varchar('password', { length: 60 }).notNull(), // bcrypt generates a 60-character string,
+  username: varchar('username', {
+    length: 256,
+  })
+    .notNull()
+    .unique(),
+  password: varchar('password', {
+    length: 60,
+  }).notNull(), // bcrypt generates a 60-character string,
   createdAt: timestamp('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -20,12 +26,24 @@ export const userProfiles = pgTable('user_profiles', {
   userId: uuid('user_id')
     .notNull()
     .unique()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  firstName: varchar('first_name', { length: 256 }).notNull(),
-  lastName: varchar('last_name', { length: 256 }).notNull(),
-  addressOne: varchar('address_one', { length: 256 }).notNull(),
-  addressTwo: varchar('address_two', { length: 256 }),
-  city: varchar('city', { length: 256 }).notNull(),
+    .references(() => users.id, {
+      onDelete: 'cascade',
+    }),
+  firstName: varchar('first_name', {
+    length: 256,
+  }).notNull(),
+  lastName: varchar('last_name', {
+    length: 256,
+  }).notNull(),
+  addressOne: varchar('address_one', {
+    length: 256,
+  }).notNull(),
+  addressTwo: varchar('address_two', {
+    length: 256,
+  }),
+  city: varchar('city', {
+    length: 256,
+  }).notNull(),
   state: varchar('state', {
     enum: [
       'AL',
@@ -80,7 +98,9 @@ export const userProfiles = pgTable('user_profiles', {
       'WY',
     ],
   }).notNull(),
-  zip: varchar('zip', { length: 20 }).notNull(),
+  zip: varchar('zip', {
+    length: 20,
+  }).notNull(),
   createdAt: timestamp('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -94,13 +114,40 @@ export const fuelQuotes = pgTable('fuel_quotes', {
   id: uuid('id').primaryKey(),
   userId: uuid('user_id')
     .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  gallonsRequested: varchar('gallons_requested', { length: 256 }).notNull(),
+    .references(() => users.id, {
+      onDelete: 'cascade',
+    }),
+  gallonsRequested: varchar('gallons_requested', {
+    length: 256,
+  }).notNull(),
   deliveryDate: timestamp('delivery_date').notNull(),
-  deliveryAddress: varchar('delivery_address', { length: 256 }).notNull(),
-  suggestedPrice: varchar('suggested_price', { length: 256 }).notNull(),
-  totalPrice: varchar('total_price', { length: 256 }).notNull(),
+  deliveryAddress: varchar('delivery_address', {
+    length: 256,
+  }).notNull(),
+  suggestedPrice: varchar('suggested_price', {
+    length: 256,
+  }).notNull(),
+  totalPrice: varchar('total_price', {
+    length: 256,
+  }).notNull(),
   createdAt: timestamp('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+})
+
+// Define session table
+export const sessions = pgTable('sessions', {
+  id: uuid('id').primaryKey(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, {
+      onDelete: 'cascade',
+    }), // Refers to the users table provided in the code
+  fingerprint: varchar('fingerprint', {
+    length: 256,
+  }).notNull(), // A unique identifier for the device
+  createdAt: timestamp('created_at')
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
 })

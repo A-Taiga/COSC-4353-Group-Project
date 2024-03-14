@@ -1,0 +1,53 @@
+{
+  "ignorePatterns": ["**/*.js"],
+  "root": true,
+  "extends": ["airbnb", "airbnb-typescript/base", "prettier"],
+  "plugins": ["prettier", "import"],
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "semi": false,
+        "bracketSpacing": true,
+        "endOfLine": "auto"
+      }
+    ],
+    // "import/extensions": [
+    //   "error",
+    //   {
+    //     "js": "always",
+    //     "ts": "always",
+    //   },
+    // ],
+    "import/no-unresolved": ["off"],
+    "no-restricted-syntax": "off",
+    "no-continue": "off",
+    "no-console": "off",
+    "no-underscore-dangle": "off",
+    "consistent-return": "off",
+    "eqeqeq": "off",
+    "func-names": "off",
+    "padding-line-between-statements": [
+      "error",
+      { "blankLine": "always", "prev": "import", "next": "*" },
+      { "blankLine": "any", "prev": "import", "next": "import" }
+    ]
+  },
+  "parser": "@typescript-eslint/parser",
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  },
+  "overrides": [
+    {
+      "files": ["*.ts"],
+      "parserOptions": {
+        "project": ["**/tsconfig.json"]
+      }
+    }
+  ]
+}
