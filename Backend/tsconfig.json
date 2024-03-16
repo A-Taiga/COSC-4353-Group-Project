@@ -7,7 +7,6 @@
     "outDir": "./build",
     "target": "ESNext",
     "module": "ESNext",
-    // "module": "CommonJS",
     "lib": ["ES6"],
     "allowJs": true,
     "skipLibCheck": true,

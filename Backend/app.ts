@@ -1,7 +1,14 @@
-import express from 'express'
-import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import dotenv from 'dotenv'
+import express from 'express'
+import path from 'path'
+import { fileURLToPath } from 'url'
 // import { connectDB } from './config/db'
+
+const __filename = fileURLToPath(import.meta.url)
+export const __dirname = path.dirname(__filename)
+dotenv.config({ path: path.join(__dirname, '/.env') })
 
 // PORT
 // If the port defined in dotenv file doesn't exist, default to 8080

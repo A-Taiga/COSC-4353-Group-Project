@@ -13,13 +13,15 @@
         "endOfLine": "auto"
       }
     ],
-    // "import/extensions": [
-    //   "error",
-    //   {
-    //     "js": "always",
-    //     "ts": "always",
-    //   },
-    // ],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true,
+        "optionalDependencies": true,
+        "peerDependencies": true,
+        "projectDependencies": false
+      }
+    ],
     "import/no-unresolved": ["off"],
     "no-restricted-syntax": "off",
     "no-continue": "off",
