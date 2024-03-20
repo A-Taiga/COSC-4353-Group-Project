@@ -94,7 +94,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     const csrfTokenObj = {
       sub: uuid(),
     }
-
+    
     const accessTokenObj = {
       sub: user.id,
       csrf: csrfTokenObj.sub,

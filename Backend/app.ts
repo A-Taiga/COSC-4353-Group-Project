@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 // import { connectDB } from './config/db'
 import errorHandler from './middlewares/errorHandler'
 import loginRouter from './routes/loginRoutes'
+import profileRouter from './routes/profileRoutes'
 
 const __filename = fileURLToPath(import.meta.url)
 export const __dirname = path.dirname(__filename)
@@ -37,9 +38,10 @@ app.use(cookieParser())
 
 const baseURL = '/api'
 const authURL = `${baseURL}/auth`
-
 // ROUTES
 app.use(`${authURL}/login`, loginRouter)
+app.use(`/api/profile`, profileRouter)
 app.use(errorHandler)
+
 
 export default app
