@@ -1,5 +1,7 @@
 import request from 'supertest'
-import app from '../app'
+import createServer from '../utils/server/server'
+
+const app = createServer()
 
 describe('user', () => {
   describe('/api/auth/login', () => {
