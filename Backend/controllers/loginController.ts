@@ -31,7 +31,16 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const { password, fingerprint } = req.body
   let { username } = req.body
 
-  if (!username || !password || !fingerprint) {
+  if (
+    !username ||
+    !password ||
+    !fingerprint ||
+    typeof username !== 'string' ||
+    typeof password !== 'string' ||
+    typeof fingerprint !== 'string' ||
+    username.length < 3 ||
+    password.length < 8
+  ) {
     return res.status(400).json({
       message: 'Bad request.',
     })
@@ -112,7 +121,14 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions) // 1 year
 
     // Redirect to the frontend callback page
-    res.status(201).json({ message: 'Logged in successfully', accessToken })
+    res
+      .status(201)
+      .json({
+        message: 'Logged in successfully',
+        accessToken,
+        csrfToken,
+        refreshToken,
+      })
   } catch (err) {
     return res.status(500).json({ message: err })
   }
