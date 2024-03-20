@@ -55,12 +55,17 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     // const user = await db.select({ username: username }).from(users)
     const user = {
       id: '46ab88b5-db5f-45b2-adde-b382cefa3cee',
+      username: 'group70',
       // hashed password of 'group70pass'
       password: '$2a$10$OSWbrxv9Ly0OvCXrFMzv4uQpXmWLDfq9538p6WHO.p4yEgHV0FE1S',
     }
 
     // Check if user does not exist or wrong password.
-    if (!user || !(await matchPassword(password, user.password))) {
+    if (
+      !user ||
+      !(await matchPassword(password, user.password)) ||
+      user.username !== username
+    ) {
       throw new Error('Unauthorized. Invalid username or password')
     }
 
