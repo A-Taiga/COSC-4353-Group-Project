@@ -5,6 +5,8 @@ import express from 'express'
 import path from 'path'
 import { fileURLToPath } from 'url'
 // import { connectDB } from './config/db'
+import errorHandler from './middlewares/errorHandler'
+import loginRouter from './routes/loginRoutes'
 
 const __filename = fileURLToPath(import.meta.url)
 export const __dirname = path.dirname(__filename)
@@ -37,4 +39,7 @@ const baseURL = '/api'
 const authURL = `${baseURL}/auth`
 
 // ROUTES
-app.use(`${authURL}/login`)
+app.use(`${authURL}/login`, loginRouter)
+app.use(errorHandler)
+
+export default app

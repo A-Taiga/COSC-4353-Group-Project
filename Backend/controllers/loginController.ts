@@ -1,12 +1,15 @@
 import bcrypt from 'bcrypt'
-import { and, eq } from 'drizzle-orm'
+import dotenv from 'dotenv'
+// import { and, eq } from 'drizzle-orm'
+// import { db } from '../configs/dbConnection'
+// import { sessions, users } from '../schemas/schema'
+// import { createSession } from '../services/session.service'
 import { CookieOptions, Request, Response } from 'express'
 import { v4 as uuid } from 'uuid'
-import { db } from '../configs/dbConnection'
 import asyncHandler from '../middlewares/asyncHandler'
-import { sessions, users } from '../schemas/schema'
-import { createSession } from '../services/session.service'
 import { signJwt } from '../utils/auth/jwt'
+
+dotenv.config()
 
 const accessTokenCookieOptions: CookieOptions = {
   maxAge: 9000000, // 15 mins
@@ -41,9 +44,7 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     username.length < 3 ||
     password.length < 8
   ) {
-    return res.status(400).json({
-      message: 'Bad request.',
-    })
+    throw new Error('Bad request.')
   }
 
   // Convert the email or username to lowercase
@@ -51,39 +52,43 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
 
   try {
     // Check if a user exists in the database.
-    const user = await db.select({ username: username }).from(users)
+    // const user = await db.select({ username: username }).from(users)
+    const user = {
+      id: '46ab88b5-db5f-45b2-adde-b382cefa3cee',
+      // hashed password of 'group70pass'
+      password: '$2a$10$OSWbrxv9Ly0OvCXrFMzv4uQpXmWLDfq9538p6WHO.p4yEgHV0FE1S',
+    }
 
     // Check if user does not exist or wrong password.
     if (!user || !(await matchPassword(password, user.password))) {
-      return res
-        .status(401)
-        .json({ message: 'Unauthorized: Invalid email or password.' })
+      throw new Error('Unauthorized. Invalid username or password')
     }
-
-    console.log({ user })
 
     // Check if the user already has a session
     // If so, delete that session
-    const existingSession = await db
-      .select({ sessionId: sessions.id })
-      .from(sessions)
-      .where(
-        and(
-          eq(sessions.userId, user.id),
-          eq(sessions.fingerprint, fingerprint),
-        ),
-      )
+    // const existingSession = await db
+    //   .select({ sessionId: sessions.id })
+    //   .from(sessions)
+    //   .where(
+    //     and(
+    //       eq(sessions.userId, user.id),
+    //       eq(sessions.fingerprint, fingerprint),
+    //     ),
+    //   )
 
-    console.log({ existingSession })
+    // console.log({ existingSession })
 
-    if (existingSession.length > 0) {
-      await db
-        .delete(sessions)
-        .where(eq(sessions.id, existingSession[0].sessionId))
-    }
+    // if (existingSession.length > 0) {
+    //   await db
+    //     .delete(sessions)
+    //     .where(eq(sessions.id, existingSession[0].sessionId))
+    // }
 
     // Create a session for the user
-    const session = await createSession(user.id, fingerprint) // Create access & refresh tokens
+    // const session = await createSession(user.id, fingerprint) // Create access & refresh tokens
+    const session = {
+      id: '46ab88b5-db5f-45b2-adde-b382cefa3cee',
+    }
 
     // Token object will contain the user info and session id
     const csrfTokenObj = {
@@ -115,22 +120,18 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
 
     // Set both tokens to cookies
     res.cookie('accessToken', accessToken, accessTokenCookieOptions) // 15 min
-
     res.cookie('csrfToken', csrfToken, accessTokenCookieOptions) // 15 min
-
     res.cookie('refreshToken', refreshToken, refreshTokenCookieOptions) // 1 year
 
     // Redirect to the frontend callback page
-    res
-      .status(201)
-      .json({
-        message: 'Logged in successfully',
-        accessToken,
-        csrfToken,
-        refreshToken,
-      })
+    res.status(200).json({
+      message: 'Logged in successfully',
+      accessToken,
+      csrfToken,
+      refreshToken,
+    })
   } catch (err) {
-    return res.status(500).json({ message: err })
+    throw new Error((err as Error).message)
   }
 })
 
