@@ -34,6 +34,8 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const { password, fingerprint } = req.body
   let { username } = req.body
 
+  console.log({ username, password, fingerprint })
+
   if (
     !username ||
     !password ||

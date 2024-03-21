@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/StartPage.css';
+// import FingerprintJS from "@fingerprintjs/fingerprintjs"
   
   const StartPage: React.FC = () => {
     const navigate = useNavigate();
