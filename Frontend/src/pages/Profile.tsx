@@ -1,5 +1,9 @@
 import React, { useState } from "react"
+import { useProfileMutation } from "../features/api/apiSlice"
 // Define the type for your form state
+
+
+
 interface ProfileFormState {
   fullName: string
   address1: string
@@ -8,7 +12,28 @@ interface ProfileFormState {
   state: string
   zipcode: string
 }
+
 export default function Profile() {
+
+  const [profile] = useProfileMutation()
+
+  const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const target = e.target as HTMLFormElement
+    e.preventDefault()
+    const data = new FormData(target)
+    try {
+      const response = await profile(Object.fromEntries(data.entries())).unwrap()
+      if (response.status !== 200)
+        throw new Error()
+      console.log("Profile saved", response)
+    }
+    catch (err) {
+      console.log("Profile failed", err)
+    }
+  }
+
+
+
   // Assuming you have a states array somewhere in your code
   const states = [
     { name: "Alabama", code: "AL" },
@@ -81,13 +106,13 @@ export default function Profile() {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Submit form logic here
-    console.log(formState)
-  }
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   // Submit form logic here
+  //   console.log(formState)
+  // }
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleOnSubmit} className="space-y-4">
       <div>
         <label
           htmlFor="fullName"
@@ -192,8 +217,8 @@ export default function Profile() {
           value={formState.zipcode}
           onChange={handleChange}
           required
-          maxLength={9}
-          pattern="\d{5}(-\d{4})?"
+          maxLength={10}
+          pattern="^\d{5}(-\d{4})?$"
           title="Zipcode must be 5 digits or 9 digits with a dash"
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
         />
