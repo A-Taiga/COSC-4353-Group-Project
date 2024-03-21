@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken'
 
 dotenv.config()
 
@@ -21,18 +21,9 @@ const verifyJwt = (token: string) => {
       decoded,
     }
   } catch (e) {
-    if (e instanceof Error) {
-      console.log(e.message)
-      return {
-        valid: false,
-        expired: e.message === 'jwt expired',
-        decoded: null,
-      }
-    }
-    // Handle non-Error objects that might have been thrown
     return {
       valid: false,
-      expired: false,
+      expired: e instanceof Error && e.message.toLowerCase() === 'jwt expired',
       decoded: null,
     }
   }
