@@ -20,14 +20,26 @@ const profile = asyncHandler(async (req: Request, res: Response) =>
 			, state
 			, zipcode} = req.body
 
-	const zipCodePattern: RegExp = /^\d{5}-\d{4}$/;
-	const zipCodePattern2: RegExp = /^\d{5}$/;
+
+	const zipCodePattern1: RegExp = /^\d{5}$/;
+	const zipCodePattern2: RegExp = /^\d{5}-\d{4}$/;
 
 
 	if (!fullName || !address1 || !city || !state || !zipcode)
 	{
-		throw new Error('Bad request.');
+		res.status(400).json(
+			{
+				message: 'Some fields are missing.',
+				fullName: fullName,
+				address1: address1,
+				address2: address2,
+				city: city,
+				state: state,
+				zipcode: zipcode,
+			}
+		)
 	}
+
 
 	fullName = fullName.toLowerCase()
 
@@ -38,17 +50,32 @@ const profile = asyncHandler(async (req: Request, res: Response) =>
 
 	if (!states.find(is))
 	{
-		throw new Error ('Bad request. state');
+		res.status(400).json(
+			{
+				message: 'Not a valid state code',
+				state: state,
+			})
+	}
+
+
+	if (!zipCodePattern1.test(zipcode) && !zipCodePattern2.test(zipcode))
+	{
+		res.status(400).json(
+			{
+				message: 'Zipcode invalid',
+				zipcode: zipcode,
+		})
 	}
 	
-	if (!zipCodePattern.test(zipcode))
-	{
-		if (!zipCodePattern2.test(zipcode))
-			throw new Error ('Bad request. zip');
-	}
 
 	res.status(200).json({
 		message: 'profile saved',
+		fullName: fullName,
+		address1: address1,
+		address2: address2,
+		city: city,
+		state: state,
+		zipcode: zipcode,
 	})
 
 });
