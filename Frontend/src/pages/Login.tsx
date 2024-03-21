@@ -14,7 +14,6 @@ export default function Login() {
     // Convert FormData into a plain object
     const credentials = Object.fromEntries(data.entries())
     credentials.fingerprint = "randomfingerprint1234"
-    console.log("credentials", credentials)
 
     try {
       // Execute the mutation
