@@ -43,7 +43,6 @@ const loginUser = asyncHandler(async (req: Request, res: Response) => {
     typeof username !== 'string' ||
     typeof password !== 'string' ||
     typeof fingerprint !== 'string' ||
-    username.length < 3 ||
     password.length < 8
   ) {
     throw new Error('Bad request.')
