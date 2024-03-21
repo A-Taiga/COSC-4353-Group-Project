@@ -66,7 +66,6 @@ const profile = asyncHandler(async (req: Request, res: Response) =>
 				zipcode: zipcode,
 		})
 	}
-	
 
 	res.status(200).json({
 		message: 'profile saved',
