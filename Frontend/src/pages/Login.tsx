@@ -1,9 +1,33 @@
 import React from "react"
-import FormTextInput, { IInput } from "../components/FormComponent"
 import { NavLink } from "react-router-dom"
+import FormTextInput, { IInput } from "../components/FormComponent"
+import { useLoginMutation } from "../features/api/apiSlice"
 import "../styles/Login.css"
 
 export default function Login() {
+  const [login] = useLoginMutation()
+
+  const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const target = e.target as HTMLFormElement
+    e.preventDefault()
+    const data = new FormData(target)
+    // Convert FormData into a plain object
+    const credentials = Object.fromEntries(data.entries())
+    credentials.fingerprint = "randomfingerprint1234"
+
+    try {
+      // Execute the mutation
+      const response = await login(credentials).unwrap()
+
+      if(response.status !== 200)
+        throw new Error()
+      console.log("Login successful", response)
+      // Handle success (e.g., navigate to a dashboard)
+    } catch (err) {
+      console.error("Login failed", err)
+    }
+  }
+
   const forms: IInput[] = [
     {
       id: "username",
@@ -14,7 +38,7 @@ export default function Login() {
     },
     {
       id: "password",
-      name: "passowrd",
+      name: "password",
       type: "password",
       label: "Password",
       required: true,
@@ -24,7 +48,7 @@ export default function Login() {
   return (
     <div id="loginContainer">
       <h1>Login</h1>
-      <form onSubmit={submition_handler}>
+      <form onSubmit={handleOnSubmit}>
         {forms.map((forms) => (
           <FormTextInput key={forms.id} {...forms} />
         ))}
@@ -36,11 +60,4 @@ export default function Login() {
       <NavLink to="/register">Register Here</NavLink>
     </div>
   )
-}
-
-function submition_handler(e: React.FormEvent<HTMLFormElement>) {
-  const target = e.target as HTMLFormElement
-  e.preventDefault()
-  const data = new FormData(target)
-  console.log(data)
 }
