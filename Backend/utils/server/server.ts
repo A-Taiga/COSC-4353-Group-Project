@@ -5,6 +5,7 @@ import errorHandler from '../../middlewares/errorHandler'
 import loginRouter from '../../routes/loginRoutes'
 import profileRouter from '../../routes/profileRoutes'
 import quoteRouter from '../../routes/quoteRoutes'
+import pricingRouter from '../../routes/pricingRoutes'
 
 const createServer = () => {
   const app = express()
@@ -25,6 +26,7 @@ const createServer = () => {
   app.use(`${authURL}/login`, loginRouter)
   app.use(`${baseURL}/profile-management`, profileRouter)
   app.use(express.json(), quoteRouter);
+  app.use(`${baseURL}/pricing`, pricingRouter)
   app.use(errorHandler)
 
   return app
