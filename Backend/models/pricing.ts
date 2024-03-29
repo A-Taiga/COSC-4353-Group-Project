@@ -7,6 +7,12 @@ interface PricingOptions {
 
 export class Pricing {
     calculatePrice(options: PricingOptions): number {
+        // Validate gallonsRequested
+        if (options.gallonsRequested < 0) {
+            console.error("Error: gallonsRequested cannot be negative");
+            return 0;
+        }
+
         // Pricing logic
 
         // Example calculation
