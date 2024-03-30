@@ -1,4 +1,4 @@
-interface PricingOptions {
+export interface PricingOptions {
     gallonsRequested: number;
     deliveryDate: Date;
     clientLocation: string;
