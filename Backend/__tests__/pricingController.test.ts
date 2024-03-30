@@ -3,7 +3,7 @@ import { calculatePrice } from '../controllers/pricingController';
 
 describe('Pricing Controller', () => {
     describe('calculatePrice', () => {
-        it('should calculate the price of fuel correctly', () => {
+        it('should calculate the price of fuel correctly', async () => {
             const req = {
                 body: {
                     gallonsRequested: 100,
@@ -12,15 +12,18 @@ describe('Pricing Controller', () => {
                     // Additional parameters
                 }
             } as Request;
-            const res = {} as Response;
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            } as unknown as Response;
 
-            calculatePrice(req, res);
+            await calculatePrice(req, res);
 
-            // Assertions
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.json).toHaveBeenCalled();
         });
 
-        it('should handle zero gallons requested', () => {
-            // Handle zero gallons requested
+        it('should handle zero gallons requested', async () => {
             const req = {
                 body: {
                     gallonsRequested: 0,
@@ -28,14 +31,19 @@ describe('Pricing Controller', () => {
                     clientLocation: 'New York',
                 }
             } as Request;
-            const res = {} as Response;
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            } as unknown as Response;
 
-            calculatePrice(req, res);
+            await calculatePrice(req, res);
 
+            // Assuming 400 for bad request
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalled();
         });
 
-        it('should handle negative gallons requested', () => {
-            // Handle negative gallons requested
+        it('should handle negative gallons requested', async () => {
             const req = {
                 body: {
                     gallonsRequested: -50,
@@ -43,12 +51,37 @@ describe('Pricing Controller', () => {
                     clientLocation: 'New York',
                 }
             } as Request;
-            const res = {} as Response;
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            } as unknown as Response;
 
-            calculatePrice(req, res);
+            await calculatePrice(req, res);
 
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(res.json).toHaveBeenCalled();
         });
 
+        /*
+        it('should handle errors and return 500 status code with error message', async () => {
+            const req = {
+                body: undefined // Set body to undefined to trigger the error handling
+            } as Request;
+            const res = {
+                status: jest.fn().mockReturnThis(),
+                json: jest.fn()
+            } as unknown as Response;
+        
+            const error = new Error('Mock error');
+        
+            console.error = jest.fn();
+        
+            await calculatePrice(req, res);
+        
+            expect(console.error).toHaveBeenCalledWith('Error calculating price:', error);
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.json).toHaveBeenCalledWith({ error: 'Internal Server Error' });
+        });
+        */
     });
 });
-
