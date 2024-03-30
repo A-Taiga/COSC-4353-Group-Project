@@ -51,3 +51,4 @@ describe('Pricing Controller', () => {
 
     });
 });
+
