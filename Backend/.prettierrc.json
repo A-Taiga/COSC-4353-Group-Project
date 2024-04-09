@@ -2,6 +2,7 @@
   "singleQuote": true,
   "semi": false,
   "bracketSpacing": true,
+  "printWidth": 60,
   "overrides": [
     {
       "files": "**/*.ts",
