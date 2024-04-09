@@ -8,6 +8,20 @@
       "when": 1710561323472,
       "tag": "0000_milky_wildside",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1712688246034,
+      "tag": "0001_late_professor_monster",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1712697947695,
+      "tag": "0002_stormy_william_stryker",
+      "breakpoints": true
     }
   ]
 }

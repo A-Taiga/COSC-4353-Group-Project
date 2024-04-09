@@ -1,14 +1,19 @@
 import bcrypt from 'bcrypt'
-import { and, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { db } from '../configs/dbConnection'
-import { insertUserSchema, users } from '../schemas/schema'
-import { User } from '../types/type'
+import { users } from '../schemas/schema'
+import {
+  UserDbReturn,
+  UserLookUpData,
+  insertUserSchema,
+  userLookUpSchema,
+} from '../types/type'
 
 // Insert the user into the database
 export const createUser = async (
   username: string,
   password: string,
-) => {
+): Promise<UserDbReturn> => {
   // Hash the password
   const hashedPassword = await bcrypt.hash(password, 10)
   const result = insertUserSchema.safeParse({
@@ -20,7 +25,7 @@ export const createUser = async (
   if (!result.success) throw new Error('Bad request.')
 
   // Insert the user into the database
-  const newUser = await db
+  const newUser: UserDbReturn = await db
     .insert(result.data)
     .values({
       ...result.data,
@@ -32,23 +37,31 @@ export const createUser = async (
 }
 
 // Get the user from the database
-export const getUser = async (user: User) => {
-  const result = User.safeParse(user)
+export const getUser = async (
+  data: UserLookUpData,
+): Promise<UserDbReturn | null> => {
+  const result = userLookUpSchema.safeParse(data)
 
   // Check if the request is valid
   if (!result.success) throw new Error('Bad request.')
 
   const { username, password } = result.data
 
-  const foundUser = await db
+  const queryResult = await db
     .select()
     .from(users)
-    .where(
-      and(
-        eq(users.username, username),
-        eq(users.password, await bcrypt.hash(password, 10)),
-      ),
-    )
+    .where(eq(users.username, username))
+
+  let foundUser: UserDbReturn | null =
+    queryResult.length > 0 ? queryResult[0] : null
+  console.log('Found User:\n', foundUser)
+
+  if (
+    !foundUser ||
+    !bcrypt.compare(password, foundUser.password)
+  ) {
+    return null
+  }
 
   return foundUser
 }
