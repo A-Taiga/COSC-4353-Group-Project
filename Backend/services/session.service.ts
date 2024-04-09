@@ -1,9 +1,34 @@
+import { and, eq } from 'drizzle-orm'
 import { db } from '../configs/dbConnection'
 import { sessions } from '../schemas/schema'
+import { SessionDbReturn } from '../types/type'
 
-export const createSession = async (userId: string, fingerprint: string) => {
+export const getSession = async (
+  userId: string,
+  fingerprint: string,
+): Promise<SessionDbReturn | null> => {
+  const result = await db
+    .select({ id: sessions.id })
+    .from(sessions)
+    .where(
+      and(
+        eq(sessions.userId, userId),
+        eq(sessions.fingerprint, fingerprint),
+      ),
+    )
+  const existingSession: SessionDbReturn | null =
+    result.length > 0 ? result[0] : null
+
+  console.log('Existing Session:\n', existingSession)
+  return existingSession
+}
+
+export const createSession = async (
+  userId: string,
+  fingerprint: string,
+): Promise<SessionDbReturn> => {
   const today = new Date()
-  const session = await db
+  const session: SessionDbReturn = await db
     .insert(sessions)
     .values({
       userId: userId,
@@ -16,6 +41,10 @@ export const createSession = async (userId: string, fingerprint: string) => {
       ),
     })
     .returning()
-  console.log(session[0])
-  return session[0]
+  console.log(session)
+  return session
+}
+
+export const deleteSession = async (sessionId: string) => {
+  await db.delete(sessions).where({ id: sessionId })
 }

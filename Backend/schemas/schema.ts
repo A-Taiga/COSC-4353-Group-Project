@@ -1,13 +1,15 @@
 import { relations, sql } from 'drizzle-orm'
 import { pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
-import { createInsertSchema, createSelectSchema } from 'drizzle-zod'
-import z from 'zod'
+import {
+  createInsertSchema,
+  createSelectSchema,
+} from 'drizzle-zod'
 
 // Drizzle DOCUMENATION: https://orm.drizzle.team/docs/get-started-postgresql
 
 // Define users tables
 export const users = pgTable('users', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   username: varchar('username', {
     length: 256,
   })
@@ -19,14 +21,11 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updatedAt: timestamp('updated_at')
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
 })
 
 // Define user_profiles table
 export const userProfiles = pgTable('user_profiles', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .unique()
@@ -105,9 +104,6 @@ export const userProfiles = pgTable('user_profiles', {
   zip: varchar('zip', {
     length: 20,
   }).notNull(),
-  createdAt: timestamp('created_at')
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
   updatedAt: timestamp('updated_at')
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -115,7 +111,7 @@ export const userProfiles = pgTable('user_profiles', {
 
 // Define fuel_quotes table
 export const fuelQuotes = pgTable('fuel_quotes', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id, {
@@ -141,7 +137,7 @@ export const fuelQuotes = pgTable('fuel_quotes', {
 
 // Define session table
 export const sessions = pgTable('sessions', {
-  id: uuid('id').primaryKey(),
+  id: uuid('id').primaryKey().defaultRandom(),
   userId: uuid('user_id')
     .notNull()
     .references(() => users.id, {
@@ -157,47 +153,52 @@ export const sessions = pgTable('sessions', {
 })
 
 // Define all relations
-export const userRelations = relations(users, ({ one, many }) => ({
-  profile: one(userProfiles, {
-    fields: [users.id],
-    references: [userProfiles.userId],
+export const userRelations = relations(
+  users,
+  ({ one, many }) => ({
+    profile: one(userProfiles, {
+      fields: [users.id],
+      references: [userProfiles.userId],
+    }),
+    fuelQuotes: many(fuelQuotes),
+    sessions: many(sessions),
   }),
-  fuelQuotes: many(fuelQuotes),
-  sessions: many(sessions),
-}))
+)
 
-export const profileRelations = relations(userProfiles, ({ one }) => ({
-  user: one(users, {
-    fields: [userProfiles.userId],
-    references: [users.id],
+export const profileRelations = relations(
+  userProfiles,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userProfiles.userId],
+      references: [users.id],
+    }),
   }),
-}))
+)
 
-export const fuelQuotesRelations = relations(fuelQuotes, ({ one }) => ({
-  user: one(users, {
-    fields: [fuelQuotes.userId],
-    references: [users.id],
+export const fuelQuotesRelations = relations(
+  fuelQuotes,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [fuelQuotes.userId],
+      references: [users.id],
+    }),
   }),
-}))
+)
 
-export const sessionRelations = relations(sessions, ({ one }) => ({
-  user: one(users, {
-    fields: [sessions.userId],
-    references: [users.id],
+export const sessionRelations = relations(
+  sessions,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [sessions.userId],
+      references: [users.id],
+    }),
   }),
-}))
+)
 
-const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const uuidRegex =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-// DOCUMENTATION: https://orm.drizzle.team/docs/zod
-// Schema for inserting a user - can be used to validate API requests
-export const insertUserSchema = createInsertSchema(users, {
-  username: z.string().toLowerCase(),
-  password: z.string().min(60, 'Password must be hashed to be at least 60 characters long'),
-})
 
-// Schema for selecting a user - can be used to validate API responses
-export const selectUserSchema = createSelectSchema(users)
 export const insertUserProfileSchema = createInsertSchema(userProfiles)
 export const selectUserProfileSchema = createSelectSchema(userProfiles)
 export const insertFuelQuoteSchema = createInsertSchema(fuelQuotes)
