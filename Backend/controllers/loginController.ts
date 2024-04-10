@@ -115,7 +115,7 @@ const loginUser = asyncHandler(
         expiresIn: process.env.ACCESS_TOKEN_TTL,
       }) // 15min
 
-      const csrfToken = signJwt(accessTokenObj, {
+      const csrfToken = signJwt(csrfTokenObj, {
         expiresIn: process.env.ACCESS_TOKEN_TTL,
       }) // 15min
 
