@@ -8,11 +8,12 @@ dotenv.config()
 
 // Declare db and blobServiceClient at module scope
 let db: any
+let client: any
 
 const connectDB = async () => {
   try {
     // Connect to Postgres
-    const client = new Client({
+    client = new Client({
       host: process.env.PGHOST,
       user: process.env.PGUSER,
       password: process.env.PGPASSWORD,
@@ -29,9 +30,11 @@ const connectDB = async () => {
 
     db = drizzle(client, { schema: schema })
   } catch (err) {
-    if (err instanceof Error) console.error(`Error: ${err.message}`)
+    if (err instanceof Error)
+      console.error(`Error: ${err.message}`)
     process.exit(1)
   }
 }
 
-export { connectDB, db }
+export { client, connectDB, db }
+

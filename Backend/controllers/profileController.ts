@@ -55,12 +55,26 @@ const profile = asyncHandler(async (req: Request, res: Response) => {
     'WY',
   ]
 
-  let { fullName, address1, address2, city, state, zipcode } = req.body
+  let {
+    fullName,
+    address1,
+    address2,
+    city,
+    state,
+    zipcode,
+    user_id,
+  } = req.body
 
   const zipCodePattern1: RegExp = /^\d{5}$/
   const zipCodePattern2: RegExp = /^\d{5}-\d{4}$/
 
-  if (!fullName || !address1 || !city || !state || !zipcode) {
+  if (
+    !fullName ||
+    !address1 ||
+    !city ||
+    !state ||
+    !zipcode
+  ) {
     res.status(400).json({
       message: 'Some fields are missing.',
       fullName: fullName,
@@ -70,6 +84,10 @@ const profile = asyncHandler(async (req: Request, res: Response) => {
       state: state,
       zipcode: zipcode,
     })
+  }
+
+  if (!user_id) {
+    throw new Error('Unauthorized')
   }
 
   fullName = fullName.toLowerCase()

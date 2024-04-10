@@ -25,12 +25,14 @@ export const createUser = async (
   if (!result.success) throw new Error('Bad request.')
 
   // Insert the user into the database
-  const newUser: UserDbReturn = await db
-    .insert(result.data)
+  const queryResult = await db
+    .insert(users)
     .values({
       ...result.data,
     })
     .returning()
+
+  const newUser: UserDbReturn = queryResult[0]
   console.log('Newly Created User:\n', newUser)
 
   return newUser
@@ -39,16 +41,17 @@ export const createUser = async (
 // Get the user from the database
 export const getUser = async (
   data: UserLookUpData,
+  isLogin: boolean = true,
 ): Promise<UserDbReturn | null> => {
   const result = userLookUpSchema.safeParse(data)
 
   // Check if the request is valid
-  if (!result.success) throw new Error('Bad request.')
+  if (!result.success) throw new Error('Bad request')
 
   const { username, password } = result.data
 
   const queryResult = await db
-    .select()
+    .select({ id: users.id, password: users.password })
     .from(users)
     .where(eq(users.username, username))
 
@@ -57,11 +60,29 @@ export const getUser = async (
   console.log('Found User:\n', foundUser)
 
   if (
-    !foundUser ||
-    !bcrypt.compare(password, foundUser.password)
-  ) {
+    isLogin &&
+    foundUser &&
+    password &&
+    foundUser.password &&
+    !(await bcrypt.compare(password, foundUser.password))
+  )
     return null
-  }
 
   return foundUser
+}
+
+export const deleteUser = async (username: string) => {
+  const result = userLookUpSchema.safeParse({ username })
+
+  // Check if the request is valid
+  if (!result.success) throw new Error('Bad request')
+
+  // Delete the user from the database
+  const queryResult = await db
+    .delete(users)
+    .where(eq(users.username, result.data.username))
+    .returning()
+
+  const deletedUser: UserDbReturn = queryResult[0]
+  console.log('Deleted User:\n', deletedUser)
 }

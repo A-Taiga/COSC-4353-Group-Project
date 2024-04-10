@@ -40,22 +40,22 @@ const loginUser = asyncHandler(
 
     console.log({ username, password, fingerprint })
 
-    if (
-      !username ||
-      !password ||
-      !fingerprint ||
-      typeof username !== 'string' ||
-      typeof password !== 'string' ||
-      typeof fingerprint !== 'string' ||
-      password.length < 7
-    ) {
-      throw new Error('Bad request.')
-    }
-
-    // Convert the email or username to lowercase
-    username = username.toLowerCase()
-
     try {
+      if (
+        !username ||
+        !password ||
+        !fingerprint ||
+        typeof username !== 'string' ||
+        typeof password !== 'string' ||
+        typeof fingerprint !== 'string' ||
+        password.length < 7
+      ) {
+        throw new Error('Bad request.')
+      }
+
+      // Convert the email or username to lowercase
+      username = username.toLowerCase()
+
       // const user = {
       //   id: '46ab88b5-db5f-45b2-adde-b382cefa3cee',
       //   username: 'group70',
@@ -64,13 +64,16 @@ const loginUser = asyncHandler(
       //     '$2a$10$OSWbrxv9Ly0OvCXrFMzv4uQpXmWLDfq9538p6WHO.p4yEgHV0FE1S',
       // }
       // Check if the username and hashed password match.
-      const user: UserDbReturn | null = await getUser({
-        username,
-        password,
-      })
+      const user: UserDbReturn | null = await getUser(
+        {
+          username,
+          password,
+        }, // UserLookUpData
+        true, // isLogin field
+      )
 
       // Check if user doesn't exist.
-      if (!user || !user.password || !user.username) {
+      if (!user || !user.id) {
         throw new Error(
           'Unauthorized. Invalid username or password',
         )
@@ -81,7 +84,6 @@ const loginUser = asyncHandler(
       const existingSession: SessionDbReturn | null =
         await getSession(user.id, fingerprint)
 
-      console.log('Existing Session:\n', existingSession)
       // Delete the existing session
       if (existingSession && existingSession.id) {
         await deleteSession(existingSession.id)
