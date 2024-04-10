@@ -46,5 +46,10 @@ export const createSession = async (
 }
 
 export const deleteSession = async (sessionId: string) => {
-  await db.delete(sessions).where({ id: sessionId })
+  const session = await db
+    .delete(sessions)
+    .where(eq(sessions.id, sessionId))
+    .returning()
+
+  console.log('Deleted Session:\n', session[0])
 }

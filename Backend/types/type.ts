@@ -6,8 +6,8 @@ import z from 'zod'
 import { sessions, users } from '../schemas/schema'
 
 export const userLookUpSchema = z.object({
-  username: z.string(),
-  password: z.string().min(7),
+  username: z.string().toLowerCase(),
+  password: z.string().min(7).optional(),
 })
 
 export type UserLookUpData = z.infer<
@@ -31,7 +31,11 @@ export type UserInsertData = z.infer<
 >
 
 // Schema for selecting a user - can be used to validate API responses
-export const selectUserSchema = createSelectSchema(users)
+export const selectUserSchema = createSelectSchema(users, {
+  id: z.string().optional(),
+  password: z.string().optional(),
+  createdAt: z.date().optional(),
+})
 export type UserDbReturn = z.infer<typeof selectUserSchema>
 
 export const selectSessionSchema = createSelectSchema(

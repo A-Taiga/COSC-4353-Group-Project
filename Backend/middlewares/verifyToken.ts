@@ -1,7 +1,11 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { verifyJwt } from '../utils/auth/jwt'
 
-const verifyTokens = (req: Request, res: Response, next: NextFunction) => {
+const verifyTokens = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   // TODO: Implement access token verification logic
   // Get the token from request header.
   const { accessToken, csrfToken } = req.cookies
@@ -48,6 +52,8 @@ const verifyTokens = (req: Request, res: Response, next: NextFunction) => {
           : 'Unauthorized',
     })
   }
+
+  req.body.user_id = accessPayload.decoded?.sub
 
   // Else, it must mean that the token is present and valid.
   // Pass it on to the next middleware.
