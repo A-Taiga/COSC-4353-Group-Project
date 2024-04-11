@@ -1,75 +1,30 @@
 import { Request, Response } from 'express';
 import asyncHandler from '../middlewares/asyncHandler';
 import { db } from '../configs/dbConnection';
+import { insertFuelQuoteSchema } from '../types/type';
+import { insertFuelQuote } from '../services/quote.service';
+import { IFuelQuoteData } from '../models/quote.model';
 
 // Pricing model import
 // import { calculateFinalQuote } from '../utils/pricingCalculator';
 
-interface FuelQuote {
-    gallonsRequested: number;
-    deliveryDate: Date;
-    deliveryAddress: string;
-    suggestedPrice: number;
-    totalAmountDue: number;
-}
+export const submitFuelQuote = asyncHandler(async (req: Request, res: Response) => {
+    try {
+        const validatedData = insertFuelQuoteSchema.parse(req.body);
 
-export const submitFuelQuote = async (req: Request, res: Response) => {
-    const { gallonsRequested, delivDate, delivAddress } = req.body;
+        // Assuming you have a userId available (e.g., from session or JWT token)
+        // You may need to adjust this based on how you're handling user authentication
+        const userId = '721cd5f6-af9b-46e8-a38e-d1e3c362a711'; 
 
-    // Simple validation
-    if (!gallonsRequested || !delivDate || !delivAddress) {
-        return res.status(400).json({ message: 'Missing required fields' });
+        const quoteDataWithUser = { ...validatedData, userId };
+
+        const result = await db.table('fuel_quotes').insert(quoteDataWithUser).returning('*').execute();
+
+        res.status(200).json({
+            message: 'Fuel quote submitted successfully',
+            fuelQuote: result.rows[0], 
+        });
+    } catch (error) {
+        res.status(400).json({ message: 'Validation failed'});
     }
-
-    // Pull data from Database here
-    console.log('Data received:', req.body);
-
-    //SIMULATION SHOULD BE REMOVED BEFORE FINAL TESTING
-    return res.status(200).json({
-        message: 'Fuel quote submitted successfully',
-        // simulated response
-        fuelQuote: {
-            gallonsRequested,
-            deliveryDate: delivDate,
-            deliveryAddress: delivAddress,
-            suggestedPrice: 2.5,
-            totalAmountDue: parseFloat(gallonsRequested) * 2.5,
-        },
-    });
-};
-
-// export const submitFuelQuote = asyncHandler(async (req: Request, res: Response) => {
-//     const { gallonsRequested, delivDate, delivAddress } = req.body;
-
-//     if (!gallonsRequested || !delivDate || !delivAddress) {
-//         return res.status(400).json({ message: 'Missing required fields' });
-//     }
-
-//     const gallons = parseFloat(gallonsRequested);
-//     const deliveryDate = new Date(delivDate);
-
-//     // Pricing logic here
-//     const suggestedPrice = 2.5; 
-//     // const totalAmountDue = calculateFinalQuote(gallons, suggestedPrice);
-//     // Current placeholder SHOULD REPLACE
-//     const totalAmountDue = gallons * suggestedPrice;
-
-//     const fuelQuote: FuelQuote = {
-//         gallonsRequested: gallons,
-//         deliveryDate: deliveryDate,
-//         deliveryAddress: delivAddress,
-//         suggestedPrice: suggestedPrice,
-//         totalAmountDue: totalAmountDue,
-//     };
-
-//     // Save to database implementation here later
-//     // Example: const savedQuote = await db.fuelQuotes.create(fuelQuote);
-    
-//     // Remove in the future, just for testing purposes
-//     console.log(fuelQuote); 
-
-//     return res.status(200).json({
-//         message: 'Fuel quote submitted successfully',
-//         fuelQuote: fuelQuote,
-//     });
-// });
+});

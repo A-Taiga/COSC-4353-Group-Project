@@ -80,19 +80,6 @@ export default function FuelQuoteForm(props: any) {
   )
 }
 
-// Send data to database, or for now logs
-// const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-//   e.preventDefault()
-//   const target = e.target as HTMLFormElement
-//   const data = new FormData(target)
-//   // Added because "disabled" didnt pass these values through to console.log
-//   data.append("delivAddress", delivAddress)
-//   data.append("suggestedPrice", suggestedPrice.toFixed(2))
-//   // REMOVE BEFORE FINAL
-//   console.log(Object.fromEntries(data.entries()))
-//   // Implemenent saving to database for fuel quote history
-// }
-
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
@@ -106,7 +93,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   };
 
   try {
-    const response = await fetch('/api/fuelQuote', { // Adjust this to your API endpoint
+    const response = await fetch('/api/fuelQuote', { 
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -119,7 +106,6 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     }
     const responseData = await response.json();
     console.log('Success:', responseData);
-    // Handle success here (e.g., showing a success message or clearing the form)
   } catch (error) {
     console.error('Error:', error);
   }
