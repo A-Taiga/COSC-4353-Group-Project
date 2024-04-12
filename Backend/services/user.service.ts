@@ -22,7 +22,8 @@ export const createUser = async (
   })
 
   // Check if the request is valid
-  if (!result.success) throw new Error('Bad request.')
+  if (!result.success || password.length == 0)
+    throw new Error('Bad request.')
 
   // Insert the user into the database
   const queryResult = await db
@@ -51,7 +52,11 @@ export const getUser = async (
   const { username, password } = result.data
 
   const queryResult = await db
-    .select({ id: users.id, password: users.password })
+    .select({
+      id: users.id,
+      username: users.username,
+      password: users.password,
+    })
     .from(users)
     .where(eq(users.username, username))
 
@@ -85,4 +90,5 @@ export const deleteUser = async (username: string) => {
 
   const deletedUser: UserDbReturn = queryResult[0]
   console.log('Deleted User:\n', deletedUser)
+  return deletedUser
 }

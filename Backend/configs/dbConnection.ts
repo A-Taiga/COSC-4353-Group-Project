@@ -10,7 +10,7 @@ dotenv.config()
 let db: any
 let client: any
 
-const connectDB = async () => {
+const connectDB = async (error: boolean = false) => {
   try {
     // Connect to Postgres
     client = new Client({
@@ -18,7 +18,7 @@ const connectDB = async () => {
       user: process.env.PGUSER,
       password: process.env.PGPASSWORD,
       database: process.env.PGHDATABASE,
-      port: parseInt(process.env.PGPORT ?? '5432'),
+      port: parseInt(process.env.PGPORT as string, 10),
       // Azure requires SSL connection.
       // For production, consider using more secure settings.
       ssl: {
@@ -28,10 +28,12 @@ const connectDB = async () => {
 
     client.connect()
 
+    if (error) throw new Error('Test connection failed')
+
     db = drizzle(client, { schema: schema })
   } catch (err) {
     if (err instanceof Error)
-      console.error(`Error: ${err.message}`)
+      console.log(`Error: ${err.message}`)
     process.exit(1)
   }
 }
