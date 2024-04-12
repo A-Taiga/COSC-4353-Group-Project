@@ -5,7 +5,8 @@ import { useProfileMutation } from "../features/api/apiSlice"
 
 
 interface ProfileFormState {
-  fullName: string
+  firstName: string
+  lastName: string
   address1: string
   address2: string
   city: string
@@ -14,7 +15,6 @@ interface ProfileFormState {
 }
 
 export default function Profile() {
-
   const [profile] = useProfileMutation()
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -22,17 +22,15 @@ export default function Profile() {
     e.preventDefault()
     const data = new FormData(target)
     try {
-      const response = await profile(Object.fromEntries(data.entries())).unwrap()
-      if (response.status !== 200)
-        throw new Error()
+      const response = await profile(
+        Object.fromEntries(data.entries())
+      ).unwrap()
+      if (response.status !== 200) throw new Error()
       console.log("Profile saved", response)
-    }
-    catch (err) {
+    } catch (err) {
       console.log("Profile failed", err)
     }
   }
-
-
 
   // Assuming you have a states array somewhere in your code
   const states = [
@@ -89,7 +87,8 @@ export default function Profile() {
   ]
 
   const [formState, setFormState] = useState<ProfileFormState>({
-    fullName: "John Doe",
+    firstName: "John",
+    lastName: "Doe",
     address1: "123 Main St",
     address2: "",
     city: "Anytown",
@@ -115,15 +114,32 @@ export default function Profile() {
     <form onSubmit={handleOnSubmit} className="space-y-4">
       <div>
         <label
-          htmlFor="fullName"
+          htmlFor="firstName"
           className="block text-sm font-medium text-gray-700"
         >
-          Full Name
+          First Name
         </label>
         <input
           type="text"
-          name="fullName"
-          value={formState.fullName}
+          name="firstName"
+          value={formState.firstName}
+          onChange={handleChange}
+          required
+          maxLength={50}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+        />
+      </div>
+      <div>
+        <label
+          htmlFor="lastName"
+          className="block text-sm font-medium text-gray-700"
+        >
+          Last Name
+        </label>
+        <input
+          type="text"
+          name="lastName"
+          value={formState.lastName}
           onChange={handleChange}
           required
           maxLength={50}
