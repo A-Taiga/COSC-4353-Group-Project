@@ -3,7 +3,7 @@ import {
   createSelectSchema,
 } from 'drizzle-zod'
 import z from 'zod'
-import { sessions, users } from '../schemas/schema'
+import { sessions, userProfiles, users } from '../schemas/schema'
 
 export const userLookUpSchema = z.object({
   username: z.string().toLowerCase(),
@@ -50,3 +50,16 @@ export const selectSessionSchema = createSelectSchema(
 export type SessionDbReturn = z.infer<
   typeof selectSessionSchema
 >
+
+export const userProfileSchema = z.object ({
+  firstName: z.string(),
+  lastName: z.string().optional(),
+  address1: z.string(),
+  address2: z.string().optional(),
+  city: z.string(),
+  state: z.string(),
+  zipcode: z.string(),
+})
+export type userProfileLookupData = z.infer <typeof userProfileSchema>
+
+export const selectUserProfileSchema = createSelectSchema(userProfiles)

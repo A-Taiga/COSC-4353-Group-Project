@@ -7,7 +7,7 @@ const errorHandler = (
   res: Response, // The outgoing HTTP response
   next: NextFunction, // Function to call the next middleware
 ) => {
-  // console.log(error)
+  console.log(error)
 
   // Convert error message to lowercase for case-insensitive comparison
   const errorString = error.toString().toLowerCase()
