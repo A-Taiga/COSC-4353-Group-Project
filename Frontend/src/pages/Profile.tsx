@@ -2,8 +2,6 @@ import React, { useState } from "react"
 import { useProfileMutation } from "../features/api/apiSlice"
 // Define the type for your form state
 
-
-
 interface ProfileFormState {
   fullName: string
   address1: string
@@ -31,8 +29,6 @@ export default function Profile() {
       console.log("Profile failed", err)
     }
   }
-
-
 
   // Assuming you have a states array somewhere in your code
   const states = [
