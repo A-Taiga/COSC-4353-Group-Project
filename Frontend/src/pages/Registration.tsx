@@ -1,17 +1,43 @@
-import React from "react"
+import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import FormTextInput, { IInput } from "../components/FormComponent"
 import NavButton from "../components/NavButton"
+import { useRegisterMutation } from "../features/api/apiSlice"
 import "../styles//Registration.css"
-
 export default function Register() {
   const passwordExpression =
     "^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$"
+  const [register, { isSuccess, isLoading }] = useRegisterMutation()
+  const navigate = useNavigate()
+  const [errorMessage, setErrorMessage] = useState("")
 
   const [values, setValues] = React.useState({
     username: "",
     password: "",
     confirmPassword: "",
   })
+
+  const submission_handler = async (e: React.FormEvent<HTMLFormElement>) => {
+    const target = e.target as HTMLFormElement
+    e.preventDefault()
+    const data = new FormData(target)
+    // Remove the confirmPassword field from the FormData
+    data.delete("confirmPassword")
+    const credentials = Object.fromEntries(data.entries())
+
+    try {
+      const response = await register(credentials).unwrap()
+      if (!isSuccess) {
+        if (response.message === "Username Taken") {
+          setErrorMessage("Username is already taken")
+        } else {
+          setErrorMessage("Registration failed")
+        }
+      } else navigate("/login")
+    } catch (err) {
+      console.error("Registration failed", err)
+    }
+  }
 
   const forms: IInput[] = [
     {
@@ -50,7 +76,6 @@ export default function Register() {
     const target = e.target as HTMLInputElement
     setValues({ ...values, [target.name]: target.value })
   }
-
   return (
     <div id="registrationContainer">
       <div id="header">
@@ -59,22 +84,21 @@ export default function Register() {
       <NavButton id="login" to="/login">
         X
       </NavButton>
-
-      <form onSubmit={submition_handler}>
-        {forms.map((forms) => (
-          <FormTextInput key={forms.id} {...forms} onChange={getValues} />
+      {errorMessage.length > 0 ? (
+        <div className="text-red-600">{errorMessage}</div>
+      ) : (
+        <div />
+      )}
+      <form onSubmit={submission_handler}>
+        {forms.map((form) => (
+          <FormTextInput key={form.id} {...form} onChange={getValues} />
         ))}
         <div id="buttons">
-          <button id="submit">Register</button>
+          <button id="submit" disabled={isLoading}>
+            {isLoading ? "Loading..." : "Register"}
+          </button>
         </div>
       </form>
     </div>
   )
-}
-
-function submition_handler(e: React.FormEvent<HTMLFormElement>) {
-  e.preventDefault()
-  const target = e.target as HTMLFormElement
-  const data = new FormData(target)
-  console.log(data)
 }

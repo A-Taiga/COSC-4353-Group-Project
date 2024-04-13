@@ -7,7 +7,7 @@ const errorHandler = (
   res: Response, // The outgoing HTTP response
   next: NextFunction, // Function to call the next middleware
 ) => {
-  // console.log(error)
+  console.log(error)
 
   // Convert error message to lowercase for case-insensitive comparison
   const errorString = error.toString().toLowerCase()
@@ -34,7 +34,7 @@ const errorHandler = (
   if (errorString.includes('username taken'))
     // If the username is already taken, send a 409 response
     return res
-      .status(409)
+      .status(200)
       .json({ message: 'Username Taken' })
 
   // For all other errors, send a 500 internal server error response
