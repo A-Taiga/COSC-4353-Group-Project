@@ -1,6 +1,6 @@
-import { createFuelQuote } from '../services/quote.service';
-import { db } from '../configs/dbConnection';
-import { fuelQuotes } from '../schemas/schema';
+import { createFuelQuote } from '../../services/quote.service';
+import { db } from '../../configs/dbConnection';
+import { fuelQuotes } from '../../schemas/schema';
 
 jest.mock('../configs/dbConnection', () => ({
   db: {
