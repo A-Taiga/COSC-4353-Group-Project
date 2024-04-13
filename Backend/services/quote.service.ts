@@ -27,14 +27,3 @@ export const createFuelQuote = async (fuelQuoteData: FuelQuoteData): Promise<Fue
   return newFuelQuote;
 }
 
-// Function to retrieve fuel quotes, potentially adding filters or lookup parameters
-// export const getFuelQuote = async (quoteId) => {
-//   const result = await db.select().from(fuelQuotes).where(eq(fuelQuotes.id, quoteId));
-  
-//   if (result.length === 0) {
-//     return null;
-//   }
-  
-//   console.log('Retrieved Fuel Quote:', result[0]);
-//   return result[0];
-// };
