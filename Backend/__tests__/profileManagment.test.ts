@@ -1,6 +1,6 @@
 import request from 'supertest'
 import createServer from '../utils/server/server'
-
+import { findUserProfile } from '../services/profile.service'
 const app = createServer()
 
 test('POST / valid data 1', async () => {
@@ -156,5 +156,13 @@ test('POST / invalid state test 1', async () => {
   expect(res.statusCode).toBe(400)
   expect(res.body.message).toBe('Not a valid state code');
 })
+
+
+
+
+
+
+
+
 
 
