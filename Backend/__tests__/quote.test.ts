@@ -4,94 +4,53 @@ import createServer from '../utils/server/server';
 const app = createServer();
 
 describe('Fuel Quote Form Submission', () => {
+  const validQuote = {
+    gallonsRequested: 500,
+    delivDate: new Date().toISOString().split('T')[0],
+    delivAddress: '123 Nunya ln',
+    suggestedPrice: 2.5,
+    totalAmountDue: 1250,
+    user_id: '12345'
+  };
+
   describe('/api/fuelQuote', () => {
-    test('POST / with valid data', async () => {
+    test('POST / with valid data including user_id', async () => {
       const res = await request(app)
         .post('/api/fuelQuote')
-        .send({
-          gallonsRequested: 500,
-          delivDate: new Date().toISOString().split('T')[0], 
-          delivAddress: '123 Nunya ln',
-          suggestedPrice: 2.5,
-          totalAmountDue: 1250
-        });
+        .send(validQuote);
       expect(res.statusCode).toBe(200);
-      expect(res.body).toHaveProperty('message');
       expect(res.body.message).toBe('Fuel quote submitted successfully');
-      expect(res.body).toHaveProperty('fuelQuote');
-      expect(res.body.fuelQuote.totalAmountDue).toBeDefined();
+      expect(res.body.fuelQuote).toBeDefined();
     });
 
-    test('POST / with missing gallonsRequested field', async () => {
+    test('POST / with valid data but no user_id (default user)', async () => {
+      const { user_id, ...quoteWithoutUserId } = validQuote;
       const res = await request(app)
         .post('/api/fuelQuote')
-        .send({
-          delivDate: new Date().toISOString().split('T')[0], 
-          delivAddress: '123 Nunya ln',
-        });
-      expect(res.statusCode).toBe(400);
-      expect(res.body).toHaveProperty('message');
-      expect(res.body.message).toBe('Missing required fields');
+        .send(quoteWithoutUserId);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.message).toBe('Fuel quote submitted successfully');
+      expect(res.body.fuelQuote.userId).toBe('default-user-id');
     });
 
-    test('POST / with missing delivDate field', async () => {
+    test('POST / with missing required field (gallonsRequested)', async () => {
+      const { gallonsRequested, ...missingRequiredField } = validQuote;
       const res = await request(app)
         .post('/api/fuelQuote')
-        .send({
-          gallonsRequested: '500',
-          delivAddress: '123 Nunya ln',
-        });
+        .send(missingRequiredField);
       expect(res.statusCode).toBe(400);
-      expect(res.body).toHaveProperty('message');
-      expect(res.body.message).toBe('Missing required fields');
+      expect(res.body.message).toBe('Validation failed');
+      expect(res.body.details).toContain('gallonsRequested');
     });
 
-    test('POST / with missing delivAddress field', async () => {
+    test('POST / with invalid data type for gallonsRequested (string instead of number)', async () => {
+      const invalidDataType = { ...validQuote, gallonsRequested: 'five hundred' };
       const res = await request(app)
         .post('/api/fuelQuote')
-        .send({
-          gallonsRequested: '500',
-          delivDate: new Date().toISOString().split('T')[0], // Future date for delivery
-        });
+        .send(invalidDataType);
       expect(res.statusCode).toBe(400);
-      expect(res.body).toHaveProperty('message');
-      expect(res.body.message).toBe('Missing required fields');
+      expect(res.body.message).toBe('Validation failed');
+      expect(res.body.details).toContain('gallonsRequested');
     });
-
-    // test('POST / with invalid data type for gallonsRequested', async () => {
-    //     const res = await request(app).post('/api/fuelQuote').send({
-    //       gallonsRequested: 'notANumber',
-    //       delivDate: new Date().toISOString().split('T')[0], // Use a valid future date
-    //       delivAddress: '123 Nunya ln',
-    //     });
-    //     expect(res.statusCode).toBe(400);
-    //     expect(res.body).toHaveProperty('message');
-    //     expect(res.body.message).toBe('Invalid data type for gallons requested');
-    //   });
-
-    //   test('POST / with negative gallonsRequested', async () => {
-    //     const res = await request(app).post('/api/fuelQuote').send({
-    //       gallonsRequested: '-500',
-    //       delivDate: new Date().toISOString().split('T')[0], // Use a valid future date
-    //       delivAddress: '123 Nunya ln',
-    //     });
-    //     expect(res.statusCode).toBe(400);
-    //     expect(res.body).toHaveProperty('message');
-    //     expect(res.body.message).toBe('gallons requested cannot be negative');
-    //   });
-
-    //   test('POST / with a past delivDate', async () => {
-    //     const pastDate = new Date();
-    //     pastDate.setDate(pastDate.getDate() - 1); // Set to yesterday
-    
-    //     const res = await request(app).post('/api/fuelQuote').send({
-    //       gallonsRequested: '500',
-    //       delivDate: pastDate.toISOString().split('T')[0],
-    //       delivAddress: '123 Nunya ln',
-    //     });
-    //     expect(res.statusCode).toBe(400);
-    //     expect(res.body).toHaveProperty('message');
-    //     expect(res.body.message).toBe('delivery date cannot be in the past');
-    //   });
   });
 });

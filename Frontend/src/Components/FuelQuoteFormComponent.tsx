@@ -10,6 +10,7 @@ const suggestedPrice = 2.5
 export default function FuelQuoteForm(props: any) {
   const [gallonsRequested, setGallonsRequested] = useState("")
   const [totalAmountDue, setTotalAmountDue] = useState("")
+  const [deliveryDate, setDeliveryDate] = useState("");
 
   // Calculates in real time as user inputs gallons requested
   const handleGallonChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,6 +18,10 @@ export default function FuelQuoteForm(props: any) {
     setGallonsRequested(gallons)
     const total = gallons ? parseFloat(gallons) * suggestedPrice : 0
     setTotalAmountDue(total.toFixed(2))
+  }
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDeliveryDate(e.target.value); // Updates state when the date changes
   }
 
   const forms: IInput[] = [
@@ -36,8 +41,9 @@ export default function FuelQuoteForm(props: any) {
       type: "date",
       label: "Delivery Date",
       required: true,
-      // Prevents user from picking past and present dates
       min: new Date().toISOString().split("T")[0],
+      value: deliveryDate, 
+      onChange: handleDateChange,
     },
     {
       id: "delivAddress",
@@ -71,7 +77,7 @@ export default function FuelQuoteForm(props: any) {
     const formData = {
       userId:'cc798fcb-2a90-4b19-a833-a1a3aa00f656',
       gallonsRequested: gallonsRequested,
-      deliveryDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
+      deliveryDate: deliveryDate,
       deliveryAddress: delivAddress,
       suggestedPrice: "2.5",
       totalPrice: "225",
