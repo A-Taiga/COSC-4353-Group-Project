@@ -16,15 +16,21 @@ export const apiSlice = createApi({
       }),
     }),
     profile: build.mutation({
-      query: ({fullName, address1, address2, city, state, zipcode}) => ({
+      query: ({ fullName, address1, address2, city, state, zipcode }) => ({
         url: "/profile-management",
         method: "POST",
-        body: {fullName, address1, address2, city, state, zipcode},
-      })
+        body: { fullName, address1, address2, city, state, zipcode },
+      }),
+    }),
+    register: build.mutation({
+      query: ({ username, password }) => ({
+        url: "auth/register",
+        method: "POST",
+        body: { username, password },
+      }),
     }),
   }),
 })
 
-
-
-export const { useLoginMutation, useProfileMutation } = apiSlice
+export const { useLoginMutation, useProfileMutation, useRegisterMutation } =
+  apiSlice

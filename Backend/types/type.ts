@@ -9,7 +9,7 @@ const uuidRegex =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export const userLookUpSchema = z.object({
-  username: z.string().toLowerCase().min(1),
+  username: z.string().toLowerCase().min(3),
   password: z.string().min(7).optional(),
 })
 
@@ -20,7 +20,7 @@ export type UserLookUpData = z.infer<
 // DOCUMENTATION: https://orm.drizzle.team/docs/zod
 // Schema for inserting a user - can be used to validate API requests
 export const insertUserSchema = createInsertSchema(users, {
-  username: z.string().toLowerCase().min(1),
+  username: z.string().toLowerCase().min(3),
   password: z
     .string()
     .min(

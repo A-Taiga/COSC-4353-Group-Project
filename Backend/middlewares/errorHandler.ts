@@ -34,7 +34,7 @@ const errorHandler = (
   if (errorString.includes('username taken'))
     // If the username is already taken, send a 409 response
     return res
-      .status(409)
+      .status(200)
       .json({ message: 'Username Taken' })
 
   // For all other errors, send a 500 internal server error response

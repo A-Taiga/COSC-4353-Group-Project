@@ -1,11 +1,13 @@
-import React from "react"
-import { NavLink } from "react-router-dom"
+import React, { useState } from "react"
+import { NavLink, useNavigate } from "react-router-dom"
 import FormTextInput, { IInput } from "../components/FormComponent"
 import { useLoginMutation } from "../features/api/apiSlice"
 import "../styles/Login.css"
 
 export default function Login() {
-  const [login] = useLoginMutation()
+  const [login, isSuccess] = useLoginMutation()
+  const [errorMessage, setErrorMessage] = useState("")
+  const navigate = useNavigate()
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const target = e.target as HTMLFormElement
@@ -18,10 +20,18 @@ export default function Login() {
     try {
       // Execute the mutation
       const response = await login(credentials).unwrap()
-
-      if(response.status !== 200)
-        throw new Error()
-      console.log("Login successful", response)
+      console.log(response)
+      if (!isSuccess) {
+        if (response.message === "Bad Request") {
+          setErrorMessage("Bad Request")
+        } else if (response.message === "Unauthorized") {
+          setErrorMessage("Username or password is incorrect")
+        }
+      } else {
+        console.log("Login successful", response)
+        // navigate("/profile", { state: { from } })
+        navigate("/profile")
+      }
       // Handle success (e.g., navigate to a dashboard)
     } catch (err) {
       console.error("Login failed", err)
@@ -48,6 +58,11 @@ export default function Login() {
   return (
     <div id="loginContainer">
       <h1>Login</h1>
+      {errorMessage.length > 0 ? (
+        <div className="text-red-600">{errorMessage}</div>
+      ) : (
+        <div />
+      )}
       <form onSubmit={handleOnSubmit}>
         {forms.map((forms) => (
           <FormTextInput key={forms.id} {...forms} />
