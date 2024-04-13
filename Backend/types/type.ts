@@ -64,15 +64,39 @@ export type SessionDbReturn = z.infer<
   typeof selectSessionSchema
 >
 
-export const userProfileSchema = z.object ({
-  firstName: z.string(),
-  lastName: z.string().optional(),
+export const userProfileSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
   address1: z.string(),
   address2: z.string().optional(),
-  city: z.string(),
-  state: z.string(),
-  zipcode: z.string(),
+  city: z.string().min(2),
+  state: z.string().min(2),
+  zipcode: z.string().min(5),
 })
-export type userProfileLookupData = z.infer <typeof userProfileSchema>
+export type userProfileLookupData = z.infer<
+  typeof userProfileSchema
+>
 
-export const selectUserProfileSchema = createSelectSchema(userProfiles)
+export const selectUserProfileSchema = createSelectSchema(
+  userProfiles,
+  {
+    id: z.string().optional(),
+    userId: z
+      .string()
+      .optional()
+      .refine((value) => !value || uuidRegex.test(value), {
+        message: 'Invalid UUID',
+      }),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    addressOne: z.string().optional(),
+    addressTwo: z.string().optional(),
+    city: z.string().optional(),
+    state: z.string().optional(),
+    zip: z.string().optional(),
+  },
+)
+
+export type UserProfileDbReturn = z.infer<
+  typeof selectUserProfileSchema
+>

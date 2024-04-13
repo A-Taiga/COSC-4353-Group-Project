@@ -1,6 +1,7 @@
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import express from 'express'
+import corsOptions from '../../configs/corsOptions'
 import errorHandler from '../../middlewares/errorHandler'
 import loginRouter from '../../routes/loginRoutes'
 import pricingRouter from '../../routes/pricingRoutes'
@@ -11,8 +12,8 @@ import registerRouter from '../../routes/registerRoutes'
 const createServer = () => {
   const app = express()
   // MIDDLEWARE
-  // app.use(cors(corsOptions))
-  app.use(cors())
+  app.use(cors(corsOptions))
+  // app.use(cors())
   app.use(express.json())
   app.use(
     express.urlencoded({
