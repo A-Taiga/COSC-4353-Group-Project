@@ -12,8 +12,10 @@ import registerRouter from '../../routes/registerRoutes'
 const createServer = () => {
   const app = express()
   // MIDDLEWARE
+
   app.use(cors(corsOptions))
   // app.use(cors())
+
   app.use(express.json())
   app.use(
     express.urlencoded({

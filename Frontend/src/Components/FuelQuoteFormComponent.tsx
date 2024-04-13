@@ -65,6 +65,54 @@ export default function FuelQuoteForm(props: any) {
     },
   ]
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  
+    const formData = {
+      userId:'cc798fcb-2a90-4b19-a833-a1a3aa00f656',
+      gallonsRequested: gallonsRequested,
+      deliveryDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
+      deliveryAddress: delivAddress,
+      suggestedPrice: "2.5",
+      totalPrice: "225",
+    };
+    console.log("FORM DATA: ", formData);
+    try {
+      // const response = 
+      await fetch('http://localhost:8080/api/fuelQuote', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      }).then(response => {
+        if (!response.ok) {
+          return response.json().then(errorData => {
+            throw new Error(`HTTP error! status: ${response.status}, ${JSON.stringify(errorData)}`);
+          });
+        }
+        return response.json();
+      }).then(data => {
+        console.log('Success:', data);
+      }).catch(error => {
+        console.error('Fetch error:', error.message);
+      });;
+  
+      // if (!response.ok) {
+      //   const errorData = await response.json();
+      //   console.error('Error Response:', errorData);
+      //   throw new Error(`HTTP error! status: ${response.status}`);
+      // } else {
+      //   const responseData = await response.json();
+      //   console.log('Success:', responseData);
+      // }
+    } catch (error) {
+      console.error(error);
+    }
+
+    
+  };
+
   return (
     <div id="fuelQuoteContainer">
       <h1>Fuel Quote Form</h1>
@@ -79,48 +127,3 @@ export default function FuelQuoteForm(props: any) {
     </div>
   )
 }
-
-// Send data to database, or for now logs
-// const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-//   e.preventDefault()
-//   const target = e.target as HTMLFormElement
-//   const data = new FormData(target)
-//   // Added because "disabled" didnt pass these values through to console.log
-//   data.append("delivAddress", delivAddress)
-//   data.append("suggestedPrice", suggestedPrice.toFixed(2))
-//   // REMOVE BEFORE FINAL
-//   console.log(Object.fromEntries(data.entries()))
-//   // Implemenent saving to database for fuel quote history
-// }
-
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-
-  // Predefined data for testing
-  const testData = {
-    gallonsRequested: 500, // Example gallons requested
-    delivDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0], // Future date, 30 days from now
-    delivAddress: "123 Nunya ln", // Hardcoded delivery address
-    suggestedPrice: 2.5, // Hardcoded suggested price
-    totalAmountDue: '1250', // Example calculated total, assuming 500 gallons * $2.5
-  };
-
-  try {
-    const response = await fetch('/api/fuelQuote', { // Adjust this to your API endpoint
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(testData),
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const responseData = await response.json();
-    console.log('Success:', responseData);
-    // Handle success here (e.g., showing a success message or clearing the form)
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
