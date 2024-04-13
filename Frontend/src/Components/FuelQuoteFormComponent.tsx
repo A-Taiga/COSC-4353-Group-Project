@@ -69,32 +69,43 @@ export default function FuelQuoteForm(props: any) {
     e.preventDefault();
   
     const formData = {
-      // userId:'cc798fcb-2a90-4b19-a833-a1a3aa00f656',
+      userId:'cc798fcb-2a90-4b19-a833-a1a3aa00f656',
       gallonsRequested: gallonsRequested,
-      delivDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
-      delivAddress: delivAddress,
+      deliveryDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
+      deliveryAddress: delivAddress,
       suggestedPrice: "2.5",
-      totalAmount: "225",
+      totalPrice: "225",
     };
-  
+    console.log("FORM DATA: ", formData);
     try {
-      console.log("FORM DATA: ", formData);
-      const response = await fetch('http://localhost:8080/api/fuelQuote', { 
+      // const response = 
+      await fetch('http://localhost:8080/api/fuelQuote', { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
-      });
+      }).then(response => {
+        if (!response.ok) {
+          return response.json().then(errorData => {
+            throw new Error(`HTTP error! status: ${response.status}, ${JSON.stringify(errorData)}`);
+          });
+        }
+        return response.json();
+      }).then(data => {
+        console.log('Success:', data);
+      }).catch(error => {
+        console.error('Fetch error:', error.message);
+      });;
   
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error Response:', errorData);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      } else {
-        const responseData = await response.json();
-        console.log('Success:', responseData);
-      }
+      // if (!response.ok) {
+      //   const errorData = await response.json();
+      //   console.error('Error Response:', errorData);
+      //   throw new Error(`HTTP error! status: ${response.status}`);
+      // } else {
+      //   const responseData = await response.json();
+      //   console.log('Success:', responseData);
+      // }
     } catch (error) {
       console.error(error);
     }
