@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { useProfileMutation } from "../features/api/apiSlice"
+import { useUpsertProfileMutation } from "../features/api/apiSlice"
 // Define the type for your form state
 
 interface ProfileFormState {
@@ -13,7 +13,7 @@ interface ProfileFormState {
 }
 
 export default function Profile() {
-  const [profile] = useProfileMutation()
+  const [profile] = useUpsertProfileMutation()
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const target = e.target as HTMLFormElement
