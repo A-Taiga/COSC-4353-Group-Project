@@ -2,8 +2,6 @@ import React, { useState } from "react"
 import { useProfileMutation } from "../features/api/apiSlice"
 // Define the type for your form state
 
-
-
 interface ProfileFormState {
   firstName: string
   lastName: string

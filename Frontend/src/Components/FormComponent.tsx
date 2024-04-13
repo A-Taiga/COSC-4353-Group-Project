@@ -1,4 +1,4 @@
-import React, { useState, InputHTMLAttributes } from "react"
+import React, { InputHTMLAttributes, useState } from "react"
 import "../styles/FormComponent.css"
 
 export interface IInput extends InputHTMLAttributes<HTMLInputElement> {
@@ -8,11 +8,14 @@ export interface IInput extends InputHTMLAttributes<HTMLInputElement> {
 
 export default function FormTextInput(props: IInput) {
   const [isFocused, setIsFocused] = useState(false)
+  const [patternMismatch, setPatternMismatch] = useState(false)
 
   const handleFocus = () => setIsFocused(true)
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     setIsFocused(false)
+    setPatternMismatch(!e.target.validity.valid)
+
     // If your input has an onBlur prop passed to it, call it
     if (props.onBlur) props.onBlur(e)
   }
@@ -26,7 +29,7 @@ export default function FormTextInput(props: IInput) {
         onFocus={handleFocus}
         onBlur={handleBlur}
       />
-      {props.error && (
+      {patternMismatch && props.error && (
         <div style={{ color: "red", marginTop: "5px" }}>{props.error}</div>
       )}
     </div>

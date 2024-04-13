@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import asyncHandler from '../middlewares/asyncHandler'
+import { findUserProfile } from '../services/profile.service'
 
 const profile = asyncHandler(async (req: Request, res: Response) => {
   const states = [
@@ -56,7 +57,8 @@ const profile = asyncHandler(async (req: Request, res: Response) => {
   ]
 
   let {
-    fullName,
+    firstName,
+    lastName,
     address1,
     address2,
     city,
@@ -69,7 +71,8 @@ const profile = asyncHandler(async (req: Request, res: Response) => {
   const zipCodePattern2: RegExp = /^\d{5}-\d{4}$/
 
   if (
-    !fullName ||
+    !firstName ||
+    !lastName ||
     !address1 ||
     !city ||
     !state ||
@@ -77,7 +80,8 @@ const profile = asyncHandler(async (req: Request, res: Response) => {
   ) {
     res.status(400).json({
       message: 'Some fields are missing.',
-      fullName: fullName,
+      firstName: firstName,
+      lastName: lastName,
       address1: address1,
       address2: address2,
       city: city,
@@ -90,7 +94,9 @@ const profile = asyncHandler(async (req: Request, res: Response) => {
     throw new Error('Unauthorized')
   }
 
-  fullName = fullName.toLowerCase()
+  firstName = firstName.toLowerCase()
+  lastName = lastName.toLowerCase()
+
 
   const is = (s: string) => {
     return s === state
@@ -110,15 +116,34 @@ const profile = asyncHandler(async (req: Request, res: Response) => {
     })
   }
 
+  let user = await findUserProfile(user_id);
+  
+  console.log("=============================================");
+  console.log(user);
+
   res.status(200).json({
     message: 'profile saved',
-    fullName: fullName,
+    firstName: firstName,
+    lastName: lastName,
     address1: address1,
     address2: address2,
     city: city,
     state: state,
     zipcode: zipcode,
   })
+
+})
+export default profile
+
+export const loadProfile = asyncHandler(async (req: Request, res: Response) => {
+  
+  let {
+    user_id,
+  } = req.body
+
+  if (!user_id) {
+    throw new Error('Unauthorized')
+  }
+  return await findUserProfile(user_id);
 })
 
-export default profile
