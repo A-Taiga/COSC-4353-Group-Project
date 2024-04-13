@@ -54,16 +54,34 @@ export type SessionDbReturn = z.infer<
 const uuidRegex =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-export const insertFuelQuoteSchema = createInsertSchema(fuelQuotes, {
-  userId: z.string().regex(uuidRegex, 'Invalid UUID format for userId').optional(),
-  gallonsRequested: z.string()
-    .transform((str) => parseFloat(str))
-    .refine((num) => !isNaN(num) && num > 0, {
-      message: "Gallons requested must be a positive number",
-    }),
-  deliveryDate: z.date()
-                .min(new Date(), 'Delivery date must be in the future'),
-  deliveryAddress: z.string().min(1, 'Delivery address cannot be empty'),
-  suggestedPrice: z.string().transform((str) => Number(str)),
-  totalPrice: z.string().transform((str) => Number(str)),
+
+
+export const FuelQuoteInsertSchema = createInsertSchema(fuelQuotes, {
+  userId: z.string().optional(),
+  gallonsRequested: z.string(), 
+  deliveryDate: z.string().refine(
+    (date) => !isNaN(Date.parse(date)), 
+    { message: "Invalid date format" }
+  ).transform((date) => new Date(date)),
+  deliveryAddress: z.string(),
+  suggestedPrice: z.string(), 
+  totalPrice: z.string() 
 });
+
+export type FuelQuoteInsertData = z.infer<typeof FuelQuoteInsertSchema>;
+
+// Fuel quote retrieval
+export const FuelQuoteLookUpSchema = z.object({
+  id: z.string().uuid()
+});
+export type FuelQuoteLookUpData = z.infer<typeof FuelQuoteLookUpSchema>;
+
+export interface FuelQuoteData {
+  id: string;
+  userId: string;
+  gallonsRequested: string;
+  deliveryDate: Date;
+  deliveryAddress: string;
+  suggestedPrice: string;
+  totalPrice: string;
+}

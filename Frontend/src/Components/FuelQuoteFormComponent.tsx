@@ -65,6 +65,43 @@ export default function FuelQuoteForm(props: any) {
     },
   ]
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+  
+    const formData = {
+      // userId:'cc798fcb-2a90-4b19-a833-a1a3aa00f656',
+      gallonsRequested: gallonsRequested,
+      delivDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0],
+      delivAddress: delivAddress,
+      suggestedPrice: "2.5",
+      totalAmount: "225",
+    };
+  
+    try {
+      console.log("FORM DATA: ", formData);
+      const response = await fetch('http://localhost:8080/api/fuelQuote', { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error Response:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      } else {
+        const responseData = await response.json();
+        console.log('Success:', responseData);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    
+  };
+
   return (
     <div id="fuelQuoteContainer">
       <h1>Fuel Quote Form</h1>
@@ -79,34 +116,3 @@ export default function FuelQuoteForm(props: any) {
     </div>
   )
 }
-
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-
-  // Predefined data for testing
-  const testData = {
-    gallonsRequested: 500, // Example gallons requested
-    delivDate: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().split('T')[0], // Future date, 30 days from now
-    delivAddress: "123 Nunya ln", // Hardcoded delivery address
-    suggestedPrice: 2.5, // Hardcoded suggested price
-    totalAmountDue: '1250', // Example calculated total, assuming 500 gallons * $2.5
-  };
-
-  try {
-    const response = await fetch('/api/fuelQuote', { 
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(testData),
-    });
-
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const responseData = await response.json();
-    console.log('Success:', responseData);
-  } catch (error) {
-    console.error('Error:', error);
-  }
-};
