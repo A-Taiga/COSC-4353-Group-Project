@@ -1,3 +1,4 @@
+/*
 import React, { useState } from 'react';
 import '../styles/History.css';
 
@@ -89,3 +90,89 @@ const DisplayHistory = () => {
 };
 
 export default DisplayHistory;
+*/
+
+import React, { useEffect, useState } from 'react';
+import '../styles/History.css';
+
+interface FuelQuote {
+    id: string;
+    userId: string;
+    gallonsRequested: string;
+    deliveryDate: Date;
+    deliveryAddress: string;
+    suggestedPrice: string;
+    totalPrice: string;
+    createdAt: Date;
+}
+
+interface FuelQuoteHistoryProps {
+    fuelQuotes?: FuelQuote[]; // Make fuelQuotes prop optional
+    userIdToDisplay: string; // User ID to filter fuel quotes
+}
+
+const FuelQuoteHistory: React.FC<FuelQuoteHistoryProps> = ({ fuelQuotes, userIdToDisplay }) => {
+    if (!fuelQuotes || fuelQuotes.length === 0) {
+        return <div>Loading...</div>; // Or display a message indicating no data
+    }
+
+    // Filter fuel quotes based on userIdToDisplay
+    const filteredFuelQuotes = fuelQuotes.filter(quote => quote.userId === userIdToDisplay);
+
+    return (
+        <div>
+            <h2>Fuel Quote History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>User ID</th>
+                        <th>Gallons Requested</th>
+                        <th>Delivery Date</th>
+                        <th>Delivery Address</th>
+                        <th>Suggested Price</th>
+                        <th>Total Price</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {filteredFuelQuotes.map((quote) => (
+                        <tr key={quote.id}>
+                            <td>{quote.id}</td>
+                            <td>{quote.userId}</td>
+                            <td>{quote.gallonsRequested}</td>
+                            <td>{quote.deliveryDate.toDateString()}</td>
+                            <td>{quote.deliveryAddress}</td>
+                            <td>{quote.suggestedPrice}</td>
+                            <td>{quote.totalPrice}</td>
+                            <td>{quote.createdAt.toDateString()}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+};
+
+const FuelQuotesPage: React.FC = () => {
+    const [fuelQuotes, setFuelQuotes] = useState<FuelQuote[]>([]);
+    const desiredUserId = "cc798fcb-2a90-4b19-a833-a1a3aa00f656";
+
+    // Simulated fetch fuel quotes data
+    useEffect(() => {
+        // Simulated data
+        const mockFuelQuotes: FuelQuote[] = [
+            // Sample fuel quotes data
+        ];
+        setFuelQuotes(mockFuelQuotes);
+    }, []);
+
+    return (
+        <div>
+            {/* Render FuelQuoteHistory component with fuelQuotes data and desired user ID */}
+            <FuelQuoteHistory fuelQuotes={fuelQuotes} userIdToDisplay={desiredUserId} />
+        </div>
+    );
+};
+
+export default FuelQuotesPage;
