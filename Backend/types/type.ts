@@ -76,3 +76,4 @@ export const userProfileSchema = z.object ({
 export type userProfileLookupData = z.infer <typeof userProfileSchema>
 
 export const selectUserProfileSchema = createSelectSchema(userProfiles)
+
