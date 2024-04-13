@@ -3,7 +3,12 @@ import {
   createSelectSchema,
 } from 'drizzle-zod'
 import z from 'zod'
-import { sessions, userProfiles, users, fuelQuotes } from '../schemas/schema'
+import {
+  fuelQuotes,
+  sessions,
+  userProfiles,
+  users,
+} from '../schemas/schema'
 
 const uuidRegex =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -101,8 +106,6 @@ export const selectUserProfileSchema = createSelectSchema(
 export type UserProfileDbReturn = z.infer<
   typeof selectUserProfileSchema
 >
-
-export const selectUserProfileSchema = createSelectSchema(userProfiles)
 
 export const FuelQuoteInsertSchema = createInsertSchema(fuelQuotes, {
   userId: z.string().optional(),
