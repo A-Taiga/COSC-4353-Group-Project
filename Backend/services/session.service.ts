@@ -28,7 +28,7 @@ export const createSession = async (
   fingerprint: string,
 ): Promise<SessionDbReturn> => {
   const today = new Date()
-  const session: SessionDbReturn = await db
+  const result: [SessionDbReturn] = await db
     .insert(sessions)
     .values({
       userId: userId,
@@ -40,8 +40,10 @@ export const createSession = async (
         today.getDate(),
       ),
     })
-    .returning()
-  console.log(session)
+    .returning({ id: sessions.id })
+  const session: SessionDbReturn = result[0]
+
+  console.log('New Session:\n', session)
   return session
 }
 

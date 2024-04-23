@@ -102,38 +102,57 @@ export const selectUserProfileSchema = createSelectSchema(
   },
 )
 
-
 export type UserProfileDbReturn = z.infer<
   typeof selectUserProfileSchema
 >
 
-export const FuelQuoteInsertSchema = createInsertSchema(fuelQuotes, {
-  userId: z.string().optional(),
-  gallonsRequested: z.string(), 
-  deliveryDate: z.string().refine(
-    (date) => !isNaN(Date.parse(date)), 
-    { message: "Invalid date format" }
-  ).transform((date) => new Date(date)),
-  deliveryAddress: z.string(),
-  suggestedPrice: z.string(), 
-  totalPrice: z.string() 
-});
+export const FuelQuoteInsertSchema = createInsertSchema(
+  fuelQuotes,
+  {
+    userId: z.string().optional(),
+    gallonsRequested: z.string(),
+    deliveryDate: z
+      .string()
+      .refine((date) => !isNaN(Date.parse(date)), {
+        message: 'Invalid date format',
+      })
+      .transform((date) => new Date(date)),
+    deliveryAddress: z.string(),
+    suggestedPrice: z.string(),
+    totalPrice: z.string(),
+  },
+)
 
-export type FuelQuoteInsertData = z.infer<typeof FuelQuoteInsertSchema>;
+export type FuelQuoteInsertData = z.infer<
+  typeof FuelQuoteInsertSchema
+>
 
 // Fuel quote retrieval
 export const FuelQuoteLookUpSchema = z.object({
-  id: z.string().uuid()
-});
-export type FuelQuoteLookUpData = z.infer<typeof FuelQuoteLookUpSchema>;
+  id: z.string().uuid(),
+})
+export type FuelQuoteLookUpData = z.infer<
+  typeof FuelQuoteLookUpSchema
+>
 
 export interface FuelQuoteData {
-  id: string;
-  userId: string;
-  gallonsRequested: string;
-  deliveryDate: Date;
-  deliveryAddress: string;
-  suggestedPrice: string;
-  totalPrice: string;
+  id: string
+  userId: string
+  gallonsRequested: string
+  deliveryDate: Date
+  deliveryAddress: string
+  suggestedPrice: string
+  totalPrice: string
 }
 
+export interface JwtDecoded {
+  valid: boolean
+  expired: boolean
+  decoded: {
+    sub: string
+    jti?: string
+    csrf?: string
+    iat: number
+    exp: number
+  } | null
+}

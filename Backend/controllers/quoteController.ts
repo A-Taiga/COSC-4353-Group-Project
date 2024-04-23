@@ -1,8 +1,7 @@
 import { Request, Response } from 'express';
-import asyncHandler from '../middlewares/asyncHandler';
-import { db } from '../configs/dbConnection';
-import { FuelQuoteInsertSchema } from '../types/type';
-import { createFuelQuote } from '../services/quote.service';
+import asyncHandler from '../middlewares/asyncHandler'
+import { createFuelQuote } from '../services/quote.service'
+import { FuelQuoteInsertSchema } from '../types/type'
 
 export const submitFuelQuote = asyncHandler(async (req: Request, res: Response) => {
     try {

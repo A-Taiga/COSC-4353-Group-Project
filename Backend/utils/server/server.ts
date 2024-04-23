@@ -8,7 +8,7 @@ import pricingRouter from '../../routes/pricingRoutes'
 import profileRouter from '../../routes/profileRoutes'
 import quoteRouter from '../../routes/quoteRoutes'
 import registerRouter from '../../routes/registerRoutes'
-
+import refreshRouter from '../../routes/refreshRoutes'
 const createServer = () => {
   const app = express()
   // MIDDLEWARE
@@ -32,6 +32,7 @@ const createServer = () => {
   app.use(`${baseURL}/profile-management`, profileRouter)
   app.use(`${baseURL}/fuelQuote`, quoteRouter)
   app.use(`${baseURL}/pricing`, pricingRouter)
+  app.use(`${baseURL}/refresh`, refreshRouter)
   app.use(errorHandler)
 
   return app

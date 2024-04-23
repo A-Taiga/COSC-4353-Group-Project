@@ -93,8 +93,9 @@ const loginUser = asyncHandler(
       const session = await createSession(
         user.id,
         fingerprint,
-      ) // Create access & refresh tokens
+      )
 
+      // Create access & refresh tokens
       // Token object will contain the user info and session id
       const csrfTokenObj = {
         sub: uuid(),
@@ -107,7 +108,7 @@ const loginUser = asyncHandler(
 
       const refreshTokenObj = {
         sub: user.id,
-        jti: session.id,
+        jti: session && session.id,
       }
 
       // Create access & refresh tokens

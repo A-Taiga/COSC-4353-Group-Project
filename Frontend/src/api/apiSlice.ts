@@ -18,10 +18,18 @@ export const apiSlice = createApi({
       }),
     }),
     upsertProfile: build.mutation({
-      query: ({ fullName, address1, address2, city, state, zipcode }) => ({
+      query: ({
+        firstName,
+        lastName,
+        address1,
+        address2,
+        city,
+        state,
+        zipcode,
+      }) => ({
         url: "/profile-management",
         method: "POST",
-        body: { fullName, address1, address2, city, state, zipcode },
+        body: { firstName, lastName, address1, address2, city, state, zipcode },
       }),
     }),
     loadProfile: build.query({

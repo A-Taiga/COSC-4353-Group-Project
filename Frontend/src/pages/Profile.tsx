@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useProfileMutation } from "../features/api/apiSlice"
+import React, { useEffect, useState } from "react"
+import { useLoadProfileQuery, useUpsertProfileMutation } from "../api/apiSlice"
 // Define the type for your form state
 
 interface ProfileFormState {
@@ -13,20 +13,44 @@ interface ProfileFormState {
 }
 
 export default function Profile() {
-  const [profile] = useProfileMutation()
+  const [formState, setFormState] = useState<ProfileFormState>({
+    firstName: "",
+    lastName: "",
+    address1: "",
+    address2: "",
+    city: "",
+    state: "",
+    zipcode: "",
+  })
+  const [upsertUserProfile, isSuccess] = useUpsertProfileMutation()
+  const { data, isSuccess: loadIsSuccess } = useLoadProfileQuery({})
+  // useEffect to update formState only when profile data changes
+  useEffect(() => {
+    if (loadIsSuccess && data && data.profile) {
+      console.log(data.profile)
+      setFormState((prevState) => ({
+        firstName: data.profile.firstName ?? prevState.firstName,
+        lastName: data.profile.lastName ?? prevState.lastName,
+        address1: data.profile.address1 ?? prevState.address1,
+        address2: data.profile.address2 ?? prevState.address2,
+        city: data.profile.city ?? prevState.city,
+        state: data.profile.state ?? prevState.state,
+        zipcode: data.profile.zipcode ?? prevState.zipcode,
+      }))
+    }
+  }, [data, loadIsSuccess]) // Dependencies array includes profile and isSuccess
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const target = e.target as HTMLFormElement
     e.preventDefault()
     const data = new FormData(target)
+    const form = Object.fromEntries(data.entries())
     try {
-      const response = await profile(
-        Object.fromEntries(data.entries())
-      ).unwrap()
-      if (response.status !== 200) throw new Error()
-      console.log("Profile saved", response)
+      const response = await upsertUserProfile(form).unwrap()
+      if (!isSuccess) throw new Error()
+      console.log("Profile saved successfully", response)
     } catch (err) {
-      console.log("Profile failed", err)
+      console.log("Profile failed to save", err)
     }
   }
 
@@ -84,16 +108,6 @@ export default function Profile() {
     { name: "Wyoming", code: "WY" },
   ]
 
-  const [formState, setFormState] = useState<ProfileFormState>({
-    firstName: "John",
-    lastName: "Doe",
-    address1: "123 Main St",
-    address2: "",
-    city: "Anytown",
-    state: "AL",
-    zipcode: "12345-6789",
-  })
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -103,11 +117,6 @@ export default function Profile() {
     })
   }
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault()
-  //   // Submit form logic here
-  //   console.log(formState)
-  // }
   return (
     <form onSubmit={handleOnSubmit} className="space-y-4">
       <div>
@@ -122,6 +131,7 @@ export default function Profile() {
           name="firstName"
           value={formState.firstName}
           onChange={handleChange}
+          placeholder="John"
           required
           maxLength={50}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -139,6 +149,7 @@ export default function Profile() {
           name="lastName"
           value={formState.lastName}
           onChange={handleChange}
+          placeholder="Doe"
           required
           maxLength={50}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -156,6 +167,7 @@ export default function Profile() {
           name="address1"
           value={formState.address1}
           onChange={handleChange}
+          placeholder="123 Main St"
           required
           maxLength={100}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -173,6 +185,7 @@ export default function Profile() {
           name="address2"
           value={formState.address2}
           onChange={handleChange}
+          placeholder="Apt 123"
           maxLength={100}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
         />
@@ -189,6 +202,7 @@ export default function Profile() {
           name="city"
           value={formState.city}
           onChange={handleChange}
+          placeholder="Anytown"
           required
           maxLength={100}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
@@ -230,6 +244,7 @@ export default function Profile() {
           name="zipcode"
           value={formState.zipcode}
           onChange={handleChange}
+          placeholder="12345-6789"
           required
           maxLength={10}
           pattern="^\d{5}(-\d{4})?$"

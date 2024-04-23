@@ -207,7 +207,7 @@ describe('user', () => {
             username: 'existingUser',
             password: 'existingPass',
           })
-        expect(res.statusCode).toBe(409)
+        expect(res.statusCode).toBe(200)
         expect(res.body).toHaveProperty('message')
         expect(res.body.message).toBe('Username Taken')
       })

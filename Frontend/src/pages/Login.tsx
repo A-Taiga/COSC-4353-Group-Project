@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
+import { useLoginMutation } from "../api/apiSlice"
 import FormTextInput, { IInput } from "../components/FormComponent"
-import { useLoginMutation } from "../features/api/apiSlice"
 import "../styles/Login.css"
 
 export default function Login() {
@@ -12,15 +12,14 @@ export default function Login() {
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const target = e.target as HTMLFormElement
     e.preventDefault()
-    const data = new FormData(target)
+    const form = new FormData(target)
     // Convert FormData into a plain object
-    const credentials = Object.fromEntries(data.entries())
+    const credentials = Object.fromEntries(form.entries())
     credentials.fingerprint = "randomfingerprint1234"
 
     try {
       // Execute the mutation
       const response = await login(credentials).unwrap()
-      console.log(response)
       if (!isSuccess) {
         if (response.message === "Bad Request") {
           setErrorMessage("Bad Request")
@@ -28,8 +27,6 @@ export default function Login() {
           setErrorMessage("Username or password is incorrect")
         }
       } else {
-        console.log("Login successful", response)
-        // navigate("/profile", { state: { from } })
         navigate("/profile")
       }
       // Handle success (e.g., navigate to a dashboard)
