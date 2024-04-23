@@ -7,7 +7,7 @@ const delivAddress = "123 Nunya ln"
 // Replace with pricing module calculations
 const suggestedPrice = 2.5
 
-export default function FuelQuoteForm(props: any) {
+export default function FuelQuoteForm() {
   const [gallonsRequested, setGallonsRequested] = useState("")
   const [totalAmountDue, setTotalAmountDue] = useState("")
   const [deliveryDate, setDeliveryDate] = useState("");
@@ -84,7 +84,6 @@ export default function FuelQuoteForm(props: any) {
     };
     console.log("FORM DATA: ", formData);
     try {
-      // const response = 
       await fetch('http://localhost:8080/api/fuelQuote', { 
         method: 'POST',
         headers: {
@@ -103,15 +102,6 @@ export default function FuelQuoteForm(props: any) {
       }).catch(error => {
         console.error('Fetch error:', error.message);
       });;
-  
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   console.error('Error Response:', errorData);
-      //   throw new Error(`HTTP error! status: ${response.status}`);
-      // } else {
-      //   const responseData = await response.json();
-      //   console.log('Success:', responseData);
-      // }
     } catch (error) {
       console.error(error);
     }
