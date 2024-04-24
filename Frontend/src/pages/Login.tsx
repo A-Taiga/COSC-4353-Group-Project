@@ -1,13 +1,22 @@
+import FingerprintJS from "@fingerprintjs/fingerprintjs"
 import React, { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import { useLoginMutation } from "../api/apiSlice"
 import FormTextInput, { IInput } from "../components/FormComponent"
+import useAuth from "../hooks/useAuth"
 import "../styles/Login.css"
 
 export default function Login() {
   const [login, isSuccess] = useLoginMutation()
   const [errorMessage, setErrorMessage] = useState("")
   const navigate = useNavigate()
+  const { auth, setAuth } = useAuth()
+
+  const getFingerprint = async () => {
+    const fpPromise = await FingerprintJS.load()
+    const fp = await fpPromise.get()
+    return fp.visitorId
+  }
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const target = e.target as HTMLFormElement
@@ -15,7 +24,7 @@ export default function Login() {
     const form = new FormData(target)
     // Convert FormData into a plain object
     const credentials = Object.fromEntries(form.entries())
-    credentials.fingerprint = "randomfingerprint1234"
+    credentials.fingerprint = await getFingerprint()
 
     try {
       // Execute the mutation
@@ -27,6 +36,11 @@ export default function Login() {
           setErrorMessage("Username or password is incorrect")
         }
       } else {
+        setAuth({
+          user: response.username,
+          fingerprint: credentials.fingerprint,
+        })
+        console.log(auth)
         navigate("/profile")
       }
       // Handle success (e.g., navigate to a dashboard)

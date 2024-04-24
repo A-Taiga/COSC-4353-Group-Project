@@ -1,8 +1,9 @@
-import { Fragment } from "react"
 import { Disclosure, Menu, Transition } from "@headlessui/react"
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline"
+import { Fragment } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import profilePic from "../assets/images/profilePic.avif"
+// import useAuth from "../hooks/useAuth"
 
 const user = {
   name: "Tom Cook",
@@ -32,6 +33,7 @@ interface PathToTitleMap {
 }
 
 export default function HeaderMain() {
+  // const { auth } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -242,6 +244,12 @@ export default function HeaderMain() {
         <header className="bg-white shadow">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              {/* {headerTitle == "Dashboard" && auth.user
+                ? `Hey ${
+                    auth.user.charAt(0).toUpperCase() +
+                    auth.user.slice(1).toLowerCase()
+                  }. Welcome!`
+                : headerTitle} */}
               {headerTitle}
             </h1>
           </div>

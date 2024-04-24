@@ -144,6 +144,7 @@ const loginUser = asyncHandler(
       // Send the tokens to the client
       res.status(200).json({
         message: 'Logged in successfully',
+        username,
         accessToken,
         csrfToken,
         refreshToken,

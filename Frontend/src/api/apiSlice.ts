@@ -1,13 +1,90 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
+import FingerprintJS from "@fingerprintjs/fingerprintjs"
+import {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+  createApi,
+  fetchBaseQuery,
+} from "@reduxjs/toolkit/query/react"
+import axios from "axios"
 
 const env = import.meta.env
+const BASE_URL = `http://${env.VITE_BACKEND_HOST}:${env.VITE_BACKEND_PORT}/api`
+
+const isAuthEndpoint = (url: string) => {
+  return url.includes("/login") || url.includes("/register")
+}
+
+const getFingerprint = async () => {
+  const fpPromise = await FingerprintJS.load()
+  const fp = await fpPromise.get()
+  return fp.visitorId
+}
+
+const refreshAccessToken = async () => {
+  // Call the refresh endpoint
+  await axios.post(`${BASE_URL}/refresh`, {
+    fingerprint: await getFingerprint(),
+  })
+}
+
+const logoutUser = async () => {
+  try {
+    await axios.post(`${BASE_URL}/auth/logout`, {
+      fingerprint: await getFingerprint(),
+    })
+  } catch (error) {
+    console.error("Logout failed:", error)
+  }
+  localStorage.clear()
+  sessionStorage.clear()
+
+  // Redirect to login page
+  window.location.href = "/login"
+}
+
+const baseQuery = fetchBaseQuery({
+  baseUrl: BASE_URL,
+  credentials: "include",
+})
+const baseQueryWithReauth: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extraOptions) => {
+  // Ensure args is of type FetchArgs before proceeding
+  if (typeof args === "string") args = { url: args } // Convert to FetchArgs if it's a string
+
+  let result = await baseQuery(args, api, extraOptions)
+  if (
+    result.error &&
+    result.error.status === 401 &&
+    !isAuthEndpoint(args.url)
+  ) {
+    try {
+      console.log("Attempting to refresh token")
+      // Try to get a new access and csrf token
+      await refreshAccessToken()
+      // Retry the initial request
+      result = await baseQuery(args, api, extraOptions)
+    } catch (refreshError) {
+      console.error("Refresh token failed:", refreshError)
+      // Log the user out if the refresh token fails
+      await logoutUser()
+      return {
+        error: {
+          status: 401,
+          data: "Session has expired. Please log in again.",
+        },
+      }
+    }
+  }
+  return result
+}
 
 export const apiSlice = createApi({
   reducerPath: "api",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `http://${env.VITE_BACKEND_HOST}:${env.VITE_BACKEND_PORT}/api`,
-    credentials: "include",
-  }),
+  baseQuery: baseQueryWithReauth,
 
   endpoints: (build) => ({
     login: build.mutation({

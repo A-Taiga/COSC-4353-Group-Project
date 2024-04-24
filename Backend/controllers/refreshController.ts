@@ -44,42 +44,55 @@ const refreshToken = asyncHandler(
         fingerprint,
       )
 
-    if (
-      !session ||
-      (session &&
-        session.id !== refreshPayload.decoded?.jti)
-    ) {
-      throw new Error(
-        'Unauthorized. Session not found or not valid.',
-      )
-    }
+      if (
+        !session ||
+        (session &&
+          session.id !== refreshPayload.decoded?.jti)
+      ) {
+        throw new Error(
+          'Unauthorized. No session found or not valid.',
+        )
+      }
 
-    // Create access & refresh tokens
-    // Token object will contain the user info and session id
-    const csrfTokenObj = {
-      sub: uuid(),
-    }
+      // Create access & refresh tokens
+      // Token object will contain the user info and session id
+      const csrfTokenObj = {
+        sub: uuid(),
+      }
 
-    const accessTokenObj = {
-      sub: refreshPayload.decoded?.sub ?? '',
-      csrf: csrfTokenObj.sub,
-    }
+      const accessTokenObj = {
+        sub: refreshPayload.decoded?.sub ?? '',
+        csrf: csrfTokenObj.sub,
+      }
 
-    // Create access & refresh tokens
-    const accessToken = signJwt(accessTokenObj, {
-      expiresIn: process.env.ACCESS_TOKEN_TTL,
-    }) // 15min
+      // Create access & refresh tokens
+      const accessToken = signJwt(accessTokenObj, {
+        expiresIn: process.env.ACCESS_TOKEN_TTL,
+      }) // 15min
 
-    const csrfToken = signJwt(csrfTokenObj, {
-      expiresIn: process.env.ACCESS_TOKEN_TTL,
-    }) // 15min
+      const csrfToken = signJwt(csrfTokenObj, {
+        expiresIn: process.env.ACCESS_TOKEN_TTL,
+      }) // 15min
 
-    res.status(200).json({
-      message: 'Refresh token successfully',
-      accessToken,
-      csrfToken,
-      refreshToken,
-    })
+      // Set both tokens to cookies
+      res.cookie(
+        'accessToken',
+        accessToken,
+        accessTokenCookieOptions,
+      ) // 15 min
+      res.cookie(
+        'csrfToken',
+        csrfToken,
+        accessTokenCookieOptions,
+      ) // 15 min
+
+      console.log('Refresh token successfully')
+
+      res.status(200).json({
+        message: 'Refresh token successfully',
+        accessToken,
+        csrfToken,
+      })
   },
 )
 
