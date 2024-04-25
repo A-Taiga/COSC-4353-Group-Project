@@ -23,16 +23,24 @@ const getFingerprint = async () => {
 
 const refreshAccessToken = async () => {
   // Call the refresh endpoint
-  await axios.post(`${BASE_URL}/refresh`, {
-    fingerprint: await getFingerprint(),
-  })
+  await axios.post(
+    `${BASE_URL}/refresh`,
+    {
+      fingerprint: await getFingerprint(),
+    },
+    { withCredentials: true }
+  )
 }
 
 const logoutUser = async () => {
   try {
-    await axios.post(`${BASE_URL}/auth/logout`, {
-      fingerprint: await getFingerprint(),
-    })
+    await axios.post(
+      `${BASE_URL}/auth/logout`,
+      {
+        fingerprint: await getFingerprint(),
+      },
+      { withCredentials: true }
+    )
   } catch (error) {
     console.error("Logout failed:", error)
   }
@@ -85,7 +93,7 @@ const baseQueryWithReauth: BaseQueryFn<
 export const apiSlice = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-
+  tagTypes: ["Profile", "Quotes"],
   endpoints: (build) => ({
     login: build.mutation({
       query: ({ username, password, fingerprint }) => ({
@@ -108,9 +116,14 @@ export const apiSlice = createApi({
         method: "POST",
         body: { firstName, lastName, address1, address2, city, state, zipcode },
       }),
+      invalidatesTags: ["Profile"],
     }),
     loadProfile: build.query({
-      query: () => ({ url: "/profile-management", method: "GET" }),
+      query: () => ({
+        url: "/profile-management",
+        method: "GET",
+        providesTags: ["Profile"],
+      }),
     }),
     register: build.mutation({
       query: ({ username, password }) => ({
@@ -118,6 +131,42 @@ export const apiSlice = createApi({
         method: "POST",
         body: { username, password },
       }),
+    }),
+    submitQuote: build.mutation({
+      query: ({
+        gallonsRequested,
+        deliveryDate,
+        deliveryAddress,
+        suggestedPrice,
+        totalPrice,
+      }) => ({
+        url: "/fuelQuote",
+        method: "POST",
+        body: {
+          gallonsRequested,
+          deliveryDate,
+          deliveryAddress,
+          suggestedPrice,
+          totalPrice,
+        },
+      }),
+    }),
+    getDeliveryAddress: build.query({
+      query: () => ({
+        url: "/fuelQuote/deliveryAddress",
+        method: "GET",
+        providesTags: ["Profile"],
+      }),
+    }),
+    getPrice: build.mutation({
+      query: ({ gallonsRequested, deliveryDate, deliveryAddress }) => ({
+        url: "/pricing",
+        method: "POST",
+        body: { gallonsRequested, deliveryDate, deliveryAddress },
+      }),
+    }),
+    getHisotyr: build.query({
+      query: () => ({ url: "/fuelQuote/history", method: "GET" }),
     }),
   }),
 })
@@ -127,4 +176,8 @@ export const {
   useUpsertProfileMutation,
   useRegisterMutation,
   useLoadProfileQuery,
+  useSubmitQuoteMutation,
+  useGetDeliveryAddressQuery,
+  useGetPriceMutation,
+  useGetHisotyrQuery,
 } = apiSlice

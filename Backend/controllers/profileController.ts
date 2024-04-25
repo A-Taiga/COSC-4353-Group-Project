@@ -90,7 +90,7 @@ const profile = asyncHandler(
       typeof zipcode !== 'string'
     ) {
       res.status(400).json({
-        message: 'Some fields are missing.',
+        message: 'Missing required fields.',
         firstName: firstName,
         lastName: lastName,
         address1: address1,

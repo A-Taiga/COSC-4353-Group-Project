@@ -2,6 +2,7 @@ import FingerprintJS from "@fingerprintjs/fingerprintjs"
 import React, { useState } from "react"
 import { NavLink, useNavigate } from "react-router-dom"
 import { useLoginMutation } from "../api/apiSlice"
+import { axiosPrivate } from "../api/axios"
 import FormTextInput, { IInput } from "../components/FormComponent"
 import useAuth from "../hooks/useAuth"
 import "../styles/Login.css"
@@ -40,7 +41,20 @@ export default function Login() {
           user: response.username,
           fingerprint: credentials.fingerprint,
         })
-        console.log(auth)
+        sessionStorage.setItem("auth", JSON.stringify(auth))
+        try {
+          const profile = await axiosPrivate.get("/profile-management")
+          if (
+            profile.data.message &&
+            profile.data.message == "Profile loaded successfully"
+          ) {
+            navigate("/fuel-quote")
+            return
+          }
+        } catch (err) {
+          console.error("Profile failed", err)
+          navigate("/profile")
+        }
         navigate("/profile")
       }
       // Handle success (e.g., navigate to a dashboard)

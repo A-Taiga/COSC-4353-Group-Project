@@ -1,74 +1,110 @@
-/*
-import { Request, Response } from 'express';
+import { Request, Response } from 'express'
 import asyncHandler from '../middlewares/asyncHandler'
-import { createFuelQuote } from '../services/quote.service'
-import { FuelQuoteInsertSchema } from '../types/type'
+import { findUserProfile } from '../services/profile.service'
+import {
+    createFuelQuote,
+    getFuelQuotes,
+} from '../services/quote.service'
+import {
+    FuelQuoteData,
+    UserProfileDbReturn,
+} from '../types/type'
 
-export const submitFuelQuote = asyncHandler(async (req: Request, res: Response) => {
+export const submitFuelQuote = asyncHandler(
+  async (req: Request, res: Response) => {
     try {
-        const validatedData = FuelQuoteInsertSchema.parse(req.body);
+      const {
+        user_id,
+        gallonsRequested,
+        deliveryAddress,
+        deliveryDate,
+        suggestedPrice,
+        totalPrice,
+      } = req.body
 
-        const userId = req.body.user_id || 'default-user-id'; 
+      if (!user_id) {
+        throw new Error('Unauthorized')
+      }
+      if (
+        !gallonsRequested ||
+        !deliveryAddress ||
+        !deliveryDate ||
+        !suggestedPrice ||
+        !totalPrice
+      ) {
+        return res
+          .status(400)
+          .json({ message: 'Missing required fields' })
+      }
 
-        const quoteDataWithUser = { ...validatedData, userId };
+      const result = await createFuelQuote({
+        gallonsRequested,
+        deliveryAddress,
+        deliveryDate,
+        suggestedPrice,
+        totalPrice,
+        userId: user_id,
+      })
 
-        const result = await createFuelQuote(req.body);
-
-        res.status(200).json({
-            message: 'Fuel quote submitted successfully',
-            fuelQuote: result,
-        });
+      res.status(200).json({
+        message: 'Fuel quote submitted successfully',
+      })
     } catch (error) {
-        let errorMessage = "Failed to do something exceptional";
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-        res.status(400).json({ message: 'Validation failed', details: errorMessage});
+      throw new Error((error as Error).message)
     }
-});
-*/
-
-import { Request, Response } from 'express';
-import asyncHandler from '../middlewares/asyncHandler';
-import { db } from '../configs/dbConnection';
-import { FuelQuoteInsertSchema } from '../types/type';
-import { createFuelQuote } from '../services/quote.service';
-
-export const submitFuelQuote = asyncHandler(async (req: Request, res: Response) => {
-    try {
-        const validatedData = FuelQuoteInsertSchema.parse(req.body);
-
-        const userId = req.body.user_id || 'default-user-id'; 
-
-        const quoteDataWithUser = { ...validatedData, userId };
-
-        const result = await createFuelQuote(req.body);
-
-        res.status(200).json({
-            message: 'Fuel quote submitted successfully',
-            fuelQuote: result,
-        });
-    } catch (error) {
-        let errorMessage = "Failed to do something exceptional";
-        if (error instanceof Error) {
-            errorMessage = error.message;
-        }
-        res.status(400).json({ message: 'Validation failed', details: errorMessage});
-    }
-});
+  },
+)
 
 // Get fuel quote history for a specific client
-export const getFuelQuoteHistory = asyncHandler(async (req: Request, res: Response) => {
+export const getFuelQuoteHistory = asyncHandler(
+  async (req: Request, res: Response) => {
     try {
-        const clientId = req.params.clientId;
+      const { user_id } = req.body
+      //   Query the database for fuel quote history for the client
+      const fuelQuotes: [FuelQuoteData] =
+        (await getFuelQuotes(user_id)) as [FuelQuoteData]
 
-        // Query the database for fuel quote history for the client
-        const fuelQuotes = await db.query("SELECT * FROM fuel_quotes WHERE user_id = 'cc798fcb-2a90-4b19-a833-a1a3aa00f656';", [clientId]);
-        console.log(fuelQuotes);
-
-        res.json({ success: true, fuelQuotes });
+      res.status(200).json({
+        message: 'Get fuel quotes successfully',
+        fuelQuotes,
+      })
     } catch (err) {
-        console.error('Error fetching fuel quote history:', err);
-        res.status(500).json({ success: false, message: 'Internal server error' });
+      throw new Error((err as Error).message)
     }
-});
+  },
+)
+
+export const getDeliveryAddress = asyncHandler(
+  async (req: Request, res: Response) => {
+    try {
+      const { user_id } = req.body
+
+      if (!user_id) {
+        throw new Error('Unauthorized')
+      }
+
+      const profile: UserProfileDbReturn | null =
+        await findUserProfile(user_id)
+
+      if (
+        !profile ||
+        !profile.firstName ||
+        !profile.lastName
+      ) {
+        return res.status(200).json({
+          message: 'Profile not found',
+          profile: profile,
+        })
+      }
+
+      console.log(profile)
+
+      return res.status(200).json({
+        message: 'Profile loaded successfully',
+        profile: profile,
+      })
+    } catch (err) {
+      throw new Error((err as Error).message)
+    }
+  },
+)

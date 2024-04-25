@@ -3,7 +3,7 @@ import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline"
 import { Fragment } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import profilePic from "../assets/images/profilePic.avif"
-// import useAuth from "../hooks/useAuth"
+import useAuth from "../hooks/useAuth"
 
 const user = {
   name: "Tom Cook",
@@ -33,7 +33,15 @@ interface PathToTitleMap {
 }
 
 export default function HeaderMain() {
-  // const { auth } = useAuth()
+  const { auth } = useAuth()
+  const username = auth.user
+
+  user.name = username
+    ? username.charAt(0).toUpperCase() + username.slice(1).toLowerCase()
+    : user.name
+
+  user.email = username ? `${username.toLowerCase()}@example.com` : user.email
+
   const location = useLocation()
   const navigate = useNavigate()
 

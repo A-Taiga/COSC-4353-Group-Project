@@ -97,7 +97,7 @@ export function setupInterceptors(axiosInstance: AxiosInstance): AxiosInstance {
           ;(error.config as ExtendedAxiosRequestConfig)._retry = true
           //
           try {
-            await axiosInstance.post("/auth/refresh")
+            await axiosInstance.post("/refresh")
             return axiosInstance(error.config as ExtendedAxiosRequestConfig) // Retry the original request with the new token
           } catch (error) {
             // Additional handling for refresh token errors
