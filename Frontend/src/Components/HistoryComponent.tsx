@@ -14,7 +14,9 @@ interface FuelQuote {
 
 const FuelQuotesPage: React.FC = () => {
   const [fuelQuotes, setFuelQuotes] = useState<FuelQuote[]>([])
-  const { data, isSuccess, isLoading } = useGetHisotyrQuery({})
+  const { data, isSuccess, isLoading } = useGetHisotyrQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
 
   // Fetch fuel quotes data
   useEffect(() => {

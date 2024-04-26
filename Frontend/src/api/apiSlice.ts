@@ -11,8 +11,16 @@ import axios from "axios"
 const env = import.meta.env
 const BASE_URL = `http://${env.VITE_BACKEND_HOST}:${env.VITE_BACKEND_PORT}/api`
 
+interface ExtraOptions {
+  attemptedRefresh?: boolean
+}
+
 const isAuthEndpoint = (url: string) => {
-  return url.includes("/login") || url.includes("/register")
+  return (
+    url.includes("/login") ||
+    url.includes("/register") ||
+    url.includes("/refresh")
+  )
 }
 
 const getFingerprint = async () => {
@@ -23,13 +31,17 @@ const getFingerprint = async () => {
 
 const refreshAccessToken = async () => {
   // Call the refresh endpoint
-  await axios.post(
+  const fingperint = await getFingerprint()
+  const response = await axios.post(
     `${BASE_URL}/refresh`,
     {
-      fingerprint: await getFingerprint(),
+      fingerprint: fingperint,
     },
     { withCredentials: true }
   )
+  console.log("Refresh token response:", response)
+
+  return response
 }
 
 const logoutUser = async () => {
@@ -59,30 +71,36 @@ const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
-> = async (args, api, extraOptions) => {
+> = async (
+  args,
+  api,
+  extraOptions: ExtraOptions = { attemptedRefresh: false }
+) => {
   // Ensure args is of type FetchArgs before proceeding
   if (typeof args === "string") args = { url: args } // Convert to FetchArgs if it's a string
 
-  let result = await baseQuery(args, api, extraOptions)
+  const result = await baseQuery(args, api, extraOptions)
+
+  // If the initial request returns unauthorized and it's not an auth endpoint
   if (
     result.error &&
     result.error.status === 401 &&
     !isAuthEndpoint(args.url)
   ) {
+    console.log("Attempting to refresh token")
     try {
-      console.log("Attempting to refresh token")
-      // Try to get a new access and csrf token
       await refreshAccessToken()
-      // Retry the initial request
-      result = await baseQuery(args, api, extraOptions)
+      return await baseQuery(args, api, {
+        ...extraOptions,
+        attemptedRefresh: true,
+      })
     } catch (refreshError) {
-      console.error("Refresh token failed:", refreshError)
-      // Log the user out if the refresh token fails
+      console.error("Refresh token attempt failed:", refreshError)
       await logoutUser()
       return {
         error: {
-          status: 401,
-          data: "Session has expired. Please log in again.",
+          status: 403,
+          data: "Session has expired after failed refresh attempt. Please log in again.",
         },
       }
     }
@@ -168,6 +186,13 @@ export const apiSlice = createApi({
     getHisotyr: build.query({
       query: () => ({ url: "/fuelQuote/history", method: "GET" }),
     }),
+    logout: build.mutation({
+      query: ({ fingerprint }) => ({
+        url: "/auth/logout",
+        method: "POST",
+        body: { fingerprint },
+      }),
+    }),
   }),
 })
 
@@ -180,4 +205,5 @@ export const {
   useGetDeliveryAddressQuery,
   useGetPriceMutation,
   useGetHisotyrQuery,
+  useLogoutMutation,
 } = apiSlice

@@ -33,13 +33,14 @@ export default function Profile() {
     if (loadIsSuccess && data && data.profile) {
       console.log(data.profile)
       setFormState((prevState) => ({
-        firstName:
-          data.profile.firstName.charAt(0).toUpperCase() +
-            data.profile.firstName.slice(1).toLowerCase() ??
-          prevState.firstName,
-        lastName:
-          data.profile.lastName.charAt(0).toUpperCase() +
-            data.profile.lastName.slice(1).toLowerCase() ?? prevState.lastName,
+        firstName: data.profile.firstName
+          ? data.profile.firstName.charAt(0).toUpperCase() +
+            data.profile.firstName.slice(1).toLowerCase()
+          : prevState.firstName,
+        lastName: data.profile.lastName
+          ? data.profile.lastName.charAt(0).toUpperCase() +
+            data.profile.lastName.slice(1).toLowerCase()
+          : prevState.lastName,
         address1: data.profile.address1 ?? prevState.address1,
         address2: data.profile.address2 ?? prevState.address2,
         city: data.profile.city ?? prevState.city,

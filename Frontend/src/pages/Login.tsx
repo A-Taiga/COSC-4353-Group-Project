@@ -39,7 +39,6 @@ export default function Login() {
       } else {
         setAuth({
           user: response.username,
-          fingerprint: credentials.fingerprint,
         })
         sessionStorage.setItem("auth", JSON.stringify(auth))
         try {

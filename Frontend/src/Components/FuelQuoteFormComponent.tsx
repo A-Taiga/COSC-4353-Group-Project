@@ -28,17 +28,34 @@ export default function FuelQuoteForm() {
     suggestedPrice: 0,
     totalPrice: 0,
   })
-  const [submitQuote, isSuccess] = useSubmitQuoteMutation()
+  const [submitQuote, { isSuccess }] = useSubmitQuoteMutation()
   const [getPrice] = useGetPriceMutation()
-  const {
-    data,
-    isSuccess: getAddressSuccess,
-    refetch,
-  } = useGetDeliveryAddressQuery(undefined, { refetchOnMountOrArgChange: true })
+  const { data, isSuccess: getAddressSuccess } = useGetDeliveryAddressQuery(
+    undefined,
+    { refetchOnMountOrArgChange: true }
+  )
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false)
+  const [opacity, setOpacity] = useState(1)
 
   useEffect(() => {
-    refetch() // Fetch delivery address on mount
-  }, [refetch])
+    if (isSuccess) {
+      setShowSuccessAlert(true)
+      setOpacity(1) // Reset opacity to 1 when a new success message needs to be shown
+
+      const timer = setTimeout(() => {
+        setOpacity(0) // Start fading out the alert
+      }, 4000) // Start fade out 1 second before removing from DOM
+
+      const removeAlert = setTimeout(() => {
+        setShowSuccessAlert(false) // Completely remove the alert after fade out
+      }, 5000) // Remove after total 5 seconds
+
+      return () => {
+        clearTimeout(timer)
+        clearTimeout(removeAlert)
+      }
+    }
+  }, [isSuccess])
 
   useEffect(() => {
     if (getAddressSuccess && data && data.profile) {
@@ -173,8 +190,7 @@ export default function FuelQuoteForm() {
     }
 
     try {
-      const response = await submitQuote(form).unwrap()
-      console.log("RESPONSE: ", response)
+      await submitQuote(form).unwrap()
       if (!isSuccess) {
         console.error("Failed to submit quote")
       } else {
@@ -186,16 +202,33 @@ export default function FuelQuoteForm() {
   }
 
   return (
-    <div id="fuelQuoteContainer">
-      <h1>Fuel Quote Form</h1>
-      <form id="fuelQuoteForm" onSubmit={handleOnSubmit}>
-        {forms.map((field) => (
-          <FormTextInput key={field.id} {...field} />
-        ))}
-        <button id="submitQuote" type="submit">
-          Submit Quote
-        </button>
-      </form>
-    </div>
+    <>
+      {showSuccessAlert && (
+        <div
+          className={`flex p-4 mb-4 text-lg text-green-800 rounded-lg ${
+            opacity === 1
+              ? "bg-green-200 dark:bg-gray-800 dark:text-green-800"
+              : "bg-green-200 dark:bg-gray-800 dark:text-green-800"
+          } transition-opacity duration-1000 ease-out`}
+          style={{ opacity }}
+          role="alert"
+        >
+          <span className="font-medium">Success alert!</span> Submit quote
+          successfully.
+        </div>
+      )}
+
+      <div id="fuelQuoteContainer">
+        <h1>Fuel Quote Form</h1>
+        <form id="fuelQuoteForm" onSubmit={handleOnSubmit}>
+          {forms.map((field) => (
+            <FormTextInput key={field.id} {...field} />
+          ))}
+          <button id="submitQuote" type="submit">
+            Submit Quote
+          </button>
+        </form>
+      </div>
+    </>
   )
 }

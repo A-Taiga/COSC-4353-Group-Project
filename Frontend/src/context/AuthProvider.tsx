@@ -3,7 +3,6 @@ import { ReactNode, createContext, useEffect, useState } from "react"
 interface AuthState {
   // Define the properties of the auth object here
   user?: string
-  fingerprint?: string
 }
 
 interface AuthContextType {
