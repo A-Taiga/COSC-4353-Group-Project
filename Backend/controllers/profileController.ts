@@ -90,7 +90,7 @@ const profile = asyncHandler(
       typeof zipcode !== 'string'
     ) {
       res.status(400).json({
-        message: 'Some fields are missing.',
+        message: 'Missing required fields.',
         firstName: firstName,
         lastName: lastName,
         address1: address1,
@@ -171,7 +171,10 @@ export const loadProfile = asyncHandler(
         !profile.firstName ||
         !profile.lastName
       ) {
-        throw new Error('Profile not found')
+        return res.status(200).json({
+          message: 'Profile not found',
+          profile: profile,
+        })
       }
 
       return res.status(200).json({
@@ -183,4 +186,3 @@ export const loadProfile = asyncHandler(
     }
   },
 )
-

@@ -1,8 +1,8 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { useRegisterMutation } from "../api/apiSlice"
 import FormTextInput, { IInput } from "../components/FormComponent"
 import NavButton from "../components/NavButton"
-import { useRegisterMutation } from "../features/api/apiSlice"
 import "../styles//Registration.css"
 export default function Register() {
   const passwordExpression =

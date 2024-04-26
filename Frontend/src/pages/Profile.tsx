@@ -1,5 +1,5 @@
-import React, { useState } from "react"
-import { useUpsertProfileMutation } from "../features/api/apiSlice"
+import React, { useEffect, useState } from "react"
+import { useLoadProfileQuery, useUpsertProfileMutation } from "../api/apiSlice"
 // Define the type for your form state
 
 interface ProfileFormState {
@@ -13,20 +13,73 @@ interface ProfileFormState {
 }
 
 export default function Profile() {
-  const [profile] = useUpsertProfileMutation()
+  const [formState, setFormState] = useState<ProfileFormState>({
+    firstName: "",
+    lastName: "",
+    address1: "",
+    address2: "",
+    city: "",
+    state: "",
+    zipcode: "",
+  })
+  const [upsertUserProfile, { isSuccess: upsertUserSuccess }] =
+    useUpsertProfileMutation()
+  const { data, isSuccess: loadIsSuccess } = useLoadProfileQuery({})
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false)
+  const [opacity, setOpacity] = useState(1)
+
+  // useEffect to update formState only when profile data changes
+  useEffect(() => {
+    if (loadIsSuccess && data && data.profile) {
+      console.log(data.profile)
+      setFormState((prevState) => ({
+        firstName: data.profile.firstName
+          ? data.profile.firstName.charAt(0).toUpperCase() +
+            data.profile.firstName.slice(1).toLowerCase()
+          : prevState.firstName,
+        lastName: data.profile.lastName
+          ? data.profile.lastName.charAt(0).toUpperCase() +
+            data.profile.lastName.slice(1).toLowerCase()
+          : prevState.lastName,
+        address1: data.profile.address1 ?? prevState.address1,
+        address2: data.profile.address2 ?? prevState.address2,
+        city: data.profile.city ?? prevState.city,
+        state: data.profile.state ?? prevState.state,
+        zipcode: data.profile.zipcode ?? prevState.zipcode,
+      }))
+    }
+  }, [data, loadIsSuccess]) // Dependencies array includes profile and isSuccess
+
+  useEffect(() => {
+    if (upsertUserSuccess) {
+      setShowSuccessAlert(true)
+      setOpacity(1) // Reset opacity to 1 when a new success message needs to be shown
+
+      const timer = setTimeout(() => {
+        setOpacity(0) // Start fading out the alert
+      }, 4000) // Start fade out 1 second before removing from DOM
+
+      const removeAlert = setTimeout(() => {
+        setShowSuccessAlert(false) // Completely remove the alert after fade out
+      }, 5000) // Remove after total 5 seconds
+
+      return () => {
+        clearTimeout(timer)
+        clearTimeout(removeAlert)
+      }
+    }
+  }, [upsertUserSuccess])
 
   const handleOnSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     const target = e.target as HTMLFormElement
     e.preventDefault()
     const data = new FormData(target)
+    const form = Object.fromEntries(data.entries())
     try {
-      const response = await profile(
-        Object.fromEntries(data.entries())
-      ).unwrap()
-      if (response.status !== 200) throw new Error()
-      console.log("Profile saved", response)
+      const response = await upsertUserProfile(form).unwrap()
+      console.log("Profile saved successfully", response)
     } catch (err) {
-      console.log("Profile failed", err)
+      console.log("Profile failed to save", err)
     }
   }
 
@@ -84,16 +137,6 @@ export default function Profile() {
     { name: "Wyoming", code: "WY" },
   ]
 
-  const [formState, setFormState] = useState<ProfileFormState>({
-    firstName: "John",
-    lastName: "Doe",
-    address1: "123 Main St",
-    address2: "",
-    city: "Anytown",
-    state: "AL",
-    zipcode: "12345-6789",
-  })
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -103,146 +146,164 @@ export default function Profile() {
     })
   }
 
-  // const handleSubmit = (e: React.FormEvent) => {
-  //   e.preventDefault()
-  //   // Submit form logic here
-  //   console.log(formState)
-  // }
   return (
-    <form onSubmit={handleOnSubmit} className="space-y-4">
-      <div>
-        <label
-          htmlFor="firstName"
-          className="block text-sm font-medium text-gray-700"
+    <>
+      {showSuccessAlert && (
+        <div
+          className={`flex p-4 mb-4 text-lg text-green-800 rounded-lg ${
+            opacity === 1
+              ? "bg-green-200 dark:bg-gray-800 dark:text-green-800"
+              : "bg-green-200 dark:bg-gray-800 dark:text-green-800"
+          } transition-opacity duration-1000 ease-out`}
+          style={{ opacity }}
+          role="alert"
         >
-          First Name
-        </label>
-        <input
-          type="text"
-          name="firstName"
-          value={formState.firstName}
-          onChange={handleChange}
-          required
-          maxLength={50}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="lastName"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Last Name
-        </label>
-        <input
-          type="text"
-          name="lastName"
-          value={formState.lastName}
-          onChange={handleChange}
-          required
-          maxLength={50}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="address1"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Address 1
-        </label>
-        <input
-          type="text"
-          name="address1"
-          value={formState.address1}
-          onChange={handleChange}
-          required
-          maxLength={100}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="address2"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Address 2
-        </label>
-        <input
-          type="text"
-          name="address2"
-          value={formState.address2}
-          onChange={handleChange}
-          maxLength={100}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="city"
-          className="block text-sm font-medium text-gray-700"
-        >
-          City
-        </label>
-        <input
-          type="text"
-          name="city"
-          value={formState.city}
-          onChange={handleChange}
-          required
-          maxLength={100}
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="state"
-          className="block text-sm font-medium text-gray-700"
-        >
-          State
-        </label>
-        <select
-          name="state"
-          value={formState.state}
-          onChange={handleChange}
-          required
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        >
-          <option value="" disabled>
-            Select a State
-          </option>
-          {states.map((state) => (
-            <option key={state.code} value={state.code}>
-              {state.name}
+          <span className="font-medium">Success alert!</span> Saved profile
+          successfully.
+        </div>
+      )}
+
+      <form onSubmit={handleOnSubmit} className="space-y-4">
+        <div>
+          <label
+            htmlFor="firstName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            First Name
+          </label>
+          <input
+            type="text"
+            name="firstName"
+            value={formState.firstName}
+            onChange={handleChange}
+            placeholder="John"
+            required
+            maxLength={50}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="lastName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Last Name
+          </label>
+          <input
+            type="text"
+            name="lastName"
+            value={formState.lastName}
+            onChange={handleChange}
+            placeholder="Doe"
+            required
+            maxLength={50}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="address1"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Address 1
+          </label>
+          <input
+            type="text"
+            name="address1"
+            value={formState.address1}
+            onChange={handleChange}
+            placeholder="123 Main St"
+            required
+            maxLength={100}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="address2"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Address 2
+          </label>
+          <input
+            type="text"
+            name="address2"
+            value={formState.address2}
+            onChange={handleChange}
+            placeholder="Apt 123"
+            maxLength={100}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="city"
+            className="block text-sm font-medium text-gray-700"
+          >
+            City
+          </label>
+          <input
+            type="text"
+            name="city"
+            value={formState.city}
+            onChange={handleChange}
+            placeholder="Anytown"
+            required
+            maxLength={100}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="state"
+            className="block text-sm font-medium text-gray-700"
+          >
+            State
+          </label>
+          <select
+            name="state"
+            value={formState.state}
+            onChange={handleChange}
+            required
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="" disabled>
+              Select a State
             </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <label
-          htmlFor="zipcode"
-          className="block text-sm font-medium text-gray-700"
+            {states.map((state) => (
+              <option key={state.code} value={state.code}>
+                {state.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="zipcode"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Zipcode
+          </label>
+          <input
+            type="text"
+            name="zipcode"
+            value={formState.zipcode}
+            onChange={handleChange}
+            placeholder="12345-6789"
+            required
+            maxLength={10}
+            pattern="^\d{5}(-\d{4})?$"
+            title="Zipcode must be 5 digits or 9 digits with a dash"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+        <button
+          type="submit"
+          className="mt-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
-          Zipcode
-        </label>
-        <input
-          type="text"
-          name="zipcode"
-          value={formState.zipcode}
-          onChange={handleChange}
-          required
-          maxLength={10}
-          pattern="^\d{5}(-\d{4})?$"
-          title="Zipcode must be 5 digits or 9 digits with a dash"
-          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-        />
-      </div>
-      <button
-        type="submit"
-        className="mt-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-      >
-        Save Profile
-      </button>
-    </form>
+          Save Profile
+        </button>
+      </form>
+    </>
   )
 }

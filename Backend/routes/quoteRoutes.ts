@@ -1,27 +1,26 @@
-/*
-import express from 'express';
-import { submitFuelQuote } from '../controllers/quoteController';
+import express from 'express'
+import {
+  getDeliveryAddress,
+  getFuelQuoteHistory,
+  submitFuelQuote,
+} from '../controllers/quoteController'
 import verifyTokens from '../middlewares/verifyToken'
 
-const router = express.Router()
-
-// router.post('/', verifyTokens, submitFuelQuote)
-router.post('/', submitFuelQuote)
-
-export default router;
-*/
-
-import express from 'express';
-import { submitFuelQuote, getFuelQuoteHistory } from '../controllers/quoteController';
-import verifyTokens from '../middlewares/verifyToken';
-
-const router = express.Router();
+const quoteRouter = express.Router()
 
 /* Route to submit a fuel quote */
-// router.post('/', verifyTokens, submitFuelQuote)
-router.post('/', submitFuelQuote)
+quoteRouter.post('/', verifyTokens, submitFuelQuote)
+quoteRouter.get(
+  '/deliveryAddress',
+  verifyTokens,
+  getDeliveryAddress,
+)
 
 /* Route to get fuel quote history for a specific client */
-router.get('/fuelquote/history/:clientId', getFuelQuoteHistory);
+quoteRouter.get(
+  '/history',
+  verifyTokens,
+  getFuelQuoteHistory,
+)
 
-export default router;
+export default quoteRouter

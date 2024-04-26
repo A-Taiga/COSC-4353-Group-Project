@@ -1,11 +1,8 @@
 import express from 'express';
 import { calculatePrice } from '../controllers/pricingController'
+import verifyToken from '../middlewares/verifyToken'
+const pricingRouter = express.Router()
 
-const router = express.Router()
+pricingRouter.route('/').post(verifyToken, calculatePrice)
 
-router
-  .route('/calculate-price')
-  // .get(verifyTokens, calculatePrice)
-  .get(calculatePrice)
-
-export default router;
+export default pricingRouter

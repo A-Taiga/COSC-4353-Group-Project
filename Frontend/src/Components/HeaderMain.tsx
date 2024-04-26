@@ -1,8 +1,11 @@
-import { Fragment } from "react"
+import FingerprintJS from "@fingerprintjs/fingerprintjs"
 import { Disclosure, Menu, Transition } from "@headlessui/react"
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline"
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Fragment } from "react"
+import { Link, useLocation } from "react-router-dom"
+import { useLogoutMutation } from "../api/apiSlice"
 import profilePic from "../assets/images/profilePic.avif"
+import useAuth from "../hooks/useAuth"
 
 const user = {
   name: "Tom Cook",
@@ -32,8 +35,39 @@ interface PathToTitleMap {
 }
 
 export default function HeaderMain() {
+  const { auth } = useAuth()
+  const [logout, { isLoading: isLogoutLoading }] = useLogoutMutation()
+  const username = auth.user
+
+  user.name = username
+    ? username.charAt(0).toUpperCase() + username.slice(1).toLowerCase()
+    : user.name
+
+  user.email = username ? `${username.toLowerCase()}@example.com` : user.email
+
   const location = useLocation()
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
+
+  const getFingerprint = async () => {
+    const fpPromise = await FingerprintJS.load()
+    const fp = await fpPromise.get()
+    return fp.visitorId
+  }
+
+  const handleSignOut = async () => {
+    try {
+      const fingerprint = await getFingerprint()
+      await logout({ fingerprint })
+      // Perform additional sign-out actions (clear local storage, redirect to login page)
+      localStorage.clear()
+      sessionStorage.clear()
+
+      // Redirect to login page
+      window.location.href = "/login"
+    } catch (error) {
+      console.error("Error during sign-out:", error)
+    }
+  }
 
   // Type the event parameter and href parameter in the handleLinkClick function
   const handleLinkClick = (
@@ -60,7 +94,7 @@ export default function HeaderMain() {
   return (
     <>
       <div className="min-h-full">
-        <Disclosure as="nav" className="bg-gray-800">
+        <Disclosure as="nav" className="bg-gray-800 sticky top-0 z-50">
           {({ open }) => (
             <>
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -132,21 +166,40 @@ export default function HeaderMain() {
                           leaveTo="transform opacity-0 scale-95"
                         >
                           <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                            {userNavigation.map((item) => (
-                              <Menu.Item key={item.name}>
-                                {() => (
-                                  <Link
-                                    to={item.href}
-                                    onClick={(e) =>
-                                      handleLinkClick(e, item.href)
-                                    }
-                                    className="block px-4 py-2 text-sm text-gray-700"
-                                  >
-                                    {item.name}
-                                  </Link>
-                                )}
-                              </Menu.Item>
-                            ))}
+                            {userNavigation.map((item) =>
+                              item.name === "Sign out" ? (
+                                <Menu.Item key={item.name}>
+                                  {() => (
+                                    <Link
+                                      to="#"
+                                      onClick={(e) => {
+                                        e.preventDefault()
+                                        handleSignOut()
+                                      }}
+                                      className="block w-full px-4 py-2 text-left text-sm text-gray-700"
+                                    >
+                                      {isLogoutLoading
+                                        ? "Signing out..."
+                                        : "Sign out"}
+                                    </Link>
+                                  )}
+                                </Menu.Item>
+                              ) : (
+                                <Menu.Item key={item.name}>
+                                  {() => (
+                                    <Link
+                                      to={item.href}
+                                      onClick={(e) =>
+                                        handleLinkClick(e, item.href)
+                                      }
+                                      className="block px-4 py-2 text-sm text-gray-700"
+                                    >
+                                      {item.name}
+                                    </Link>
+                                  )}
+                                </Menu.Item>
+                              )
+                            )}
                           </Menu.Items>
                         </Transition>
                       </Menu>
@@ -174,55 +227,22 @@ export default function HeaderMain() {
               </div>
 
               <Disclosure.Panel className="md:hidden">
-                <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-                  {navigation.map((item) => (
-                    // Using a button element for Disclosure.Button and handling navigation programmatically
-                    <Disclosure.Button
-                      key={item.name}
-                      as="button" // Changed to 'button' to avoid invalid HTML and handling navigation programmatically
-                      onClick={() => navigate(item.href)} // Programmatically navigate
-                      className={classNames(
-                        location.pathname === item.href
-                          ? "bg-gray-900 text-white"
-                          : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                        "block rounded-md px-3 py-2 text-base font-medium"
-                      )}
-                      aria-current={
-                        location.pathname === item.href ? "page" : undefined
-                      }
-                    >
-                      {item.name}
-                    </Disclosure.Button>
-                  ))}
-                </div>
-                <div className="border-t border-gray-700 pb-3 pt-4">
-                  <div className="flex items-center px-5">
-                    <div className="flex-shrink-0">
-                      <img
-                        className="h-10 w-10 rounded-full"
-                        src={user.imageUrl}
-                        alt=""
-                      />
-                    </div>
-                    <div className="ml-3">
-                      <div className="text-base font-medium leading-none text-white">
-                        {user.name}
-                      </div>
-                      <div className="text-sm font-medium leading-none text-gray-400">
-                        {user.email}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      className="relative ml-auto flex-shrink-0 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                    >
-                      <span className="absolute -inset-1.5" />
-                      <span className="sr-only">View notifications</span>
-                      <BellIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
-                  </div>
-                  <div className="mt-3 space-y-1 px-2">
-                    {userNavigation.map((item) => (
+                {/* ... */}
+                <div className="mt-3 space-y-1 px-2">
+                  {userNavigation.map((item) =>
+                    item.name === "Sign out" ? (
+                      <Link
+                        key={item.name}
+                        to="#"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handleSignOut()
+                        }}
+                        className="block w-full rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                      >
+                        {isLogoutLoading ? "Signing out..." : "Sign out"}
+                      </Link>
+                    ) : (
                       <Disclosure.Button
                         key={item.name}
                         as="a"
@@ -231,8 +251,8 @@ export default function HeaderMain() {
                       >
                         {item.name}
                       </Disclosure.Button>
-                    ))}
-                  </div>
+                    )
+                  )}
                 </div>
               </Disclosure.Panel>
             </>
@@ -242,6 +262,12 @@ export default function HeaderMain() {
         <header className="bg-white shadow">
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+              {/* {headerTitle == "Dashboard" && auth.user
+                ? `Hey ${
+                    auth.user.charAt(0).toUpperCase() +
+                    auth.user.slice(1).toLowerCase()
+                  }. Welcome!`
+                : headerTitle} */}
               {headerTitle}
             </h1>
           </div>
