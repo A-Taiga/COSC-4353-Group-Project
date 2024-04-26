@@ -6,7 +6,7 @@ import {
 } from '../services/profile.service'
 import { UserProfileDbReturn } from '../types/type'
 
-const profile = asyncHandler(
+export const profile = asyncHandler(
   async (req: Request, res: Response) => {
     const states = [
       'AL',
@@ -152,7 +152,7 @@ const profile = asyncHandler(
     })
   },
 )
-export default profile
+
 
 export const loadProfile = asyncHandler(
   async (req: Request, res: Response) => {
