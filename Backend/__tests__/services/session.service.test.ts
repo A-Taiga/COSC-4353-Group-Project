@@ -1,6 +1,7 @@
 import {
   client,
   connectDB,
+  db
 } from '../../configs/dbConnection'
 import {
   createSession,
@@ -80,4 +81,36 @@ describe('Session functions', () => {
       expect(deleteResult).toHaveProperty('id') // Ensure the response contains the id of deleted session
     })
   })
+
+  describe('Session functions error handling', () => {
+    it('handles database errors during session creation', async () => {
+      // Mock the database insertion to throw an error
+      db.insert.mockImplementationOnce(() => {
+        throw new Error("Database insertion failed");
+      });
+      
+      await expect(createSession(userId, fingerprint)).rejects.toThrow("Database insertion failed");
+    });
+  
+    it('handles database errors during session retrieval', async () => {
+      // Mock the database selection to throw an error
+      db.select.mockImplementationOnce(() => {
+        throw new Error("Database selection failed");
+      });
+  
+      await expect(getSession(userId, fingerprint)).rejects.toThrow("Database selection failed");
+    });
+  
+    it('handles database errors during session deletion', async () => {
+      // Create a session to ensure an ID is available for deletion
+      const session = await createSession(userId, fingerprint);
+      // Mock the database deletion to throw an error
+      db.delete.mockImplementationOnce(() => {
+        throw new Error("Database deletion failed");
+      });
+  
+      await expect(deleteSession(session.id)).rejects.toThrow("Database deletion failed");
+    });
+  });
+  
 })
