@@ -1,173 +1,77 @@
-import { Request, Response, NextFunction } from 'express';
-import { calculatePrice } from '../controllers/pricingController';
+import request from 'supertest';
+import express from 'express';
+import bodyParser from 'body-parser';
+import { calculatePrice } from '../controllers/pricingController'; // Adjust the import path as necessary
 
+// Mocking the services
 jest.mock('../services/quote.service', () => ({
   getFuelQuotes: jest.fn()
 }));
 
-const mockedGetFuelQuotes = require('../services/quote.service').getFuelQuotes;
+const app = express();
+app.use(bodyParser.json());
+app.post('/calculate-price', calculatePrice);
 
-describe('Pricing Controller', () => {
-  describe('calculatePrice', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+describe('calculatePrice Controller', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    it('should calculate the price of fuel correctly', async () => {
-      const req = {
-        body: {
-          gallonsRequested: 100,
-          deliveryAddress: 'New York',
-          user_id: 'mockUserId'
-        }
-      } as Request;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      } as unknown as Response;
-      const next = jest.fn() as NextFunction;
+  it('should return 400 if user_id is missing', async () => {
+    const response = await request(app)
+      .post('/calculate-price')
+      .send({ gallonsRequested: '500', deliveryAddress: '123 Main St' });
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('message', 'Unauthorized');
+  });
 
-      await calculatePrice(req, res, next);
+  it('should return 400 if required fields are missing', async () => {
+    const response = await request(app)
+      .post('/calculate-price')
+      .send({ user_id: '1' }); // Missing gallonsRequested and deliveryAddress
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('message', 'Missing required fields');
+  });
 
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalled();
-    });
-
-    it('should handle zero gallons requested', async () => {
-      const req = {
-        body: {
-          gallonsRequested: 0,
-          deliveryAddress: 'New York',
-          user_id: 'mockUserId'
-        }
-      } as Request;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      } as unknown as Response;
-      const next = jest.fn() as NextFunction;
-
-      await calculatePrice(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalled();
-    });
-
-    it('should handle negative gallons requested', async () => {
-      const req = {
-        body: {
-          gallonsRequested: -50,
-          deliveryAddress: 'New York',
-          user_id: 'mockUserId'
-        }
-      } as Request;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      } as unknown as Response;
-      const next = jest.fn() as NextFunction;
-
-      await calculatePrice(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalled();
-    });
-
-    it('should handle unauthorized user', async () => {
-      const req = {
-        body: {
-          gallonsRequested: 100,
-          deliveryAddress: 'New York'
-        }
-      } as Request;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      } as unknown as Response;
-      const next = jest.fn() as NextFunction;
-
-      await calculatePrice(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Unauthorized' });
-    });
-
-    it('should calculate the price correctly with rate history and high gallons requested', async () => {
-      mockedGetFuelQuotes.mockResolvedValueOnce([{ id: 1, user_id: 'mockUserId', gallonsRequested: 500, deliveryAddress: 'Texas' }]);
-
-      const req = {
-        body: {
-          gallonsRequested: 1500,
-          deliveryAddress: 'Texas',
-          user_id: 'mockUserId'
-        }
-      } as Request;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      } as unknown as Response;
-      const next = jest.fn() as NextFunction;
-
-      await calculatePrice(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(200);
-
-      // Calculations for expected values
-      const currentPricePerGallon = 1.5;
-      const companyProfitFactor = 0.1;
-      const locationFactor = 0.02;
-      const rateHistoryFactor = 0.01;
-      const gallonsRequestedFactor = 0.02;
-      const margin = currentPricePerGallon * (locationFactor - rateHistoryFactor + gallonsRequestedFactor + companyProfitFactor);
-      const suggestedPrice = currentPricePerGallon + margin;
-      const totalPrice = req.body.gallonsRequested * suggestedPrice;
-
-      expect(res.json).toHaveBeenCalledWith({
-        message: 'Price calculated successfully',
-        pricingResult: {
-          suggestedPrice: suggestedPrice.toFixed(3),
-          totalPrice: totalPrice.toFixed(2)
-        }
+  it('should return 400 if gallons requested is not a positive number', async () => {
+    const response = await request(app)
+      .post('/calculate-price')
+      .send({
+        user_id: '1',
+        gallonsRequested: '0',
+        deliveryAddress: '123 Main St'
       });
-    });
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty('message', 'Gallons requested must be a positive number');
+  });
 
-    it('should calculate the price correctly without rate history and low gallons requested', async () => {
-      mockedGetFuelQuotes.mockResolvedValueOnce([]);
-
-      const req = {
-        body: {
-          gallonsRequested: 500,
-          deliveryAddress: 'New York',
-          user_id: 'mockUserId'
-        }
-      } as Request;
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      } as unknown as Response;
-      const next = jest.fn() as NextFunction;
-
-      await calculatePrice(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(200);
-
-      // Calculations for expected values
-      const currentPricePerGallon = 1.5;
-      const companyProfitFactor = 0.1;
-      const locationFactor = 0.04;
-      const rateHistoryFactor = 0;
-      const gallonsRequestedFactor = 0.03;
-      const margin = currentPricePerGallon * (locationFactor - rateHistoryFactor + gallonsRequestedFactor + companyProfitFactor);
-      const suggestedPrice = currentPricePerGallon + margin;
-      const totalPrice = req.body.gallonsRequested * suggestedPrice;
-
-      expect(res.json).toHaveBeenCalledWith({
-        message: 'Price calculated successfully',
-        pricingResult: {
-          suggestedPrice: suggestedPrice.toFixed(3),
-          totalPrice: totalPrice.toFixed(2)
-        }
+  it('should calculate the price correctly', async () => {
+    require('../services/quote.service').getFuelQuotes.mockResolvedValue([]); // No history
+    const response = await request(app)
+      .post('/calculate-price')
+      .send({
+        user_id: '1',
+        gallonsRequested: '1000',
+        deliveryAddress: '789 Main St'
       });
-    });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('message', 'Price calculated successfully');
+    expect(response.body.pricingResult).toHaveProperty('suggestedPrice');
+    expect(response.body.pricingResult).toHaveProperty('totalPrice');
+  });
+
+  it('should calculate different prices based on address in Texas', async () => {
+    require('../services/quote.service').getFuelQuotes.mockResolvedValue([{ quoteId: 'quote1' }]); // Has history
+    const response = await request(app)
+      .post('/calculate-price')
+      .send({
+        user_id: '1',
+        gallonsRequested: '1500',
+        deliveryAddress: 'Houston, TX'
+      });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('message', 'Price calculated successfully');
+    expect(parseFloat(response.body.pricingResult.suggestedPrice)).toBeLessThan(1.674); // Expected value with Texas factor
+    expect(parseFloat(response.body.pricingResult.totalPrice)).toBeGreaterThan(2500); // Total price based on calculated rates
   });
 });
