@@ -1,87 +1,173 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { calculatePrice } from '../controllers/pricingController';
 
+jest.mock('../services/quote.service', () => ({
+  getFuelQuotes: jest.fn()
+}));
+
+const mockedGetFuelQuotes = require('../services/quote.service').getFuelQuotes;
+
 describe('Pricing Controller', () => {
-    describe('calculatePrice', () => {
-        it('should calculate the price of fuel correctly', async () => {
-            const req = {
-                body: {
-                    gallonsRequested: 100,
-                    deliveryDate: new Date(),
-                    clientLocation: 'New York',
-                    // Additional parameters
-                }
-            } as Request;
-            const res = {
-                status: jest.fn().mockReturnThis(),
-                json: jest.fn()
-            } as unknown as Response;
-
-            await calculatePrice(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(200);
-            expect(res.json).toHaveBeenCalled();
-        });
-
-        it('should handle zero gallons requested', async () => {
-            const req = {
-                body: {
-                    gallonsRequested: 0,
-                    deliveryDate: new Date(),
-                    clientLocation: 'New York',
-                }
-            } as Request;
-            const res = {
-                status: jest.fn().mockReturnThis(),
-                json: jest.fn()
-            } as unknown as Response;
-
-            await calculatePrice(req, res);
-
-            // Assuming 400 for bad request
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalled();
-        });
-
-        it('should handle negative gallons requested', async () => {
-            const req = {
-                body: {
-                    gallonsRequested: -50,
-                    deliveryDate: new Date(),
-                    clientLocation: 'New York',
-                }
-            } as Request;
-            const res = {
-                status: jest.fn().mockReturnThis(),
-                json: jest.fn()
-            } as unknown as Response;
-
-            await calculatePrice(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalled();
-        });
-
-        /*
-        it('should handle errors and return 500 status code with error message', async () => {
-            const req = {
-                body: undefined // Set body to undefined to trigger the error handling
-            } as Request;
-            const res = {
-                status: jest.fn().mockReturnThis(),
-                json: jest.fn()
-            } as unknown as Response;
-        
-            const error = new Error('Mock error');
-        
-            console.error = jest.fn();
-        
-            await calculatePrice(req, res);
-        
-            expect(console.error).toHaveBeenCalledWith('Error calculating price:', error);
-            expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Internal Server Error' });
-        });
-        */
+  describe('calculatePrice', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
     });
+
+    it('should calculate the price of fuel correctly', async () => {
+      const req = {
+        body: {
+          gallonsRequested: 100,
+          deliveryAddress: 'New York',
+          user_id: 'mockUserId'
+        }
+      } as Request;
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      } as unknown as Response;
+      const next = jest.fn() as NextFunction;
+
+      await calculatePrice(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalled();
+    });
+
+    it('should handle zero gallons requested', async () => {
+      const req = {
+        body: {
+          gallonsRequested: 0,
+          deliveryAddress: 'New York',
+          user_id: 'mockUserId'
+        }
+      } as Request;
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      } as unknown as Response;
+      const next = jest.fn() as NextFunction;
+
+      await calculatePrice(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalled();
+    });
+
+    it('should handle negative gallons requested', async () => {
+      const req = {
+        body: {
+          gallonsRequested: -50,
+          deliveryAddress: 'New York',
+          user_id: 'mockUserId'
+        }
+      } as Request;
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      } as unknown as Response;
+      const next = jest.fn() as NextFunction;
+
+      await calculatePrice(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalled();
+    });
+
+    it('should handle unauthorized user', async () => {
+      const req = {
+        body: {
+          gallonsRequested: 100,
+          deliveryAddress: 'New York'
+        }
+      } as Request;
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      } as unknown as Response;
+      const next = jest.fn() as NextFunction;
+
+      await calculatePrice(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Unauthorized' });
+    });
+
+    it('should calculate the price correctly with rate history and high gallons requested', async () => {
+      mockedGetFuelQuotes.mockResolvedValueOnce([{ id: 1, user_id: 'mockUserId', gallonsRequested: 500, deliveryAddress: 'Texas' }]);
+
+      const req = {
+        body: {
+          gallonsRequested: 1500,
+          deliveryAddress: 'Texas',
+          user_id: 'mockUserId'
+        }
+      } as Request;
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      } as unknown as Response;
+      const next = jest.fn() as NextFunction;
+
+      await calculatePrice(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+
+      // Calculations for expected values
+      const currentPricePerGallon = 1.5;
+      const companyProfitFactor = 0.1;
+      const locationFactor = 0.02;
+      const rateHistoryFactor = 0.01;
+      const gallonsRequestedFactor = 0.02;
+      const margin = currentPricePerGallon * (locationFactor - rateHistoryFactor + gallonsRequestedFactor + companyProfitFactor);
+      const suggestedPrice = currentPricePerGallon + margin;
+      const totalPrice = req.body.gallonsRequested * suggestedPrice;
+
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Price calculated successfully',
+        pricingResult: {
+          suggestedPrice: suggestedPrice.toFixed(3),
+          totalPrice: totalPrice.toFixed(2)
+        }
+      });
+    });
+
+    it('should calculate the price correctly without rate history and low gallons requested', async () => {
+      mockedGetFuelQuotes.mockResolvedValueOnce([]);
+
+      const req = {
+        body: {
+          gallonsRequested: 500,
+          deliveryAddress: 'New York',
+          user_id: 'mockUserId'
+        }
+      } as Request;
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      } as unknown as Response;
+      const next = jest.fn() as NextFunction;
+
+      await calculatePrice(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(200);
+
+      // Calculations for expected values
+      const currentPricePerGallon = 1.5;
+      const companyProfitFactor = 0.1;
+      const locationFactor = 0.04;
+      const rateHistoryFactor = 0;
+      const gallonsRequestedFactor = 0.03;
+      const margin = currentPricePerGallon * (locationFactor - rateHistoryFactor + gallonsRequestedFactor + companyProfitFactor);
+      const suggestedPrice = currentPricePerGallon + margin;
+      const totalPrice = req.body.gallonsRequested * suggestedPrice;
+
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Price calculated successfully',
+        pricingResult: {
+          suggestedPrice: suggestedPrice.toFixed(3),
+          totalPrice: totalPrice.toFixed(2)
+        }
+      });
+    });
+  });
 });
